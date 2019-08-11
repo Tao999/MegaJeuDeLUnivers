@@ -1,23 +1,19 @@
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-
-import javax.imageio.ImageIO;
 
 public class CEnemy {
-	static final String NAME_PATH = "gfx/asteroid.png";
-	public static final int DEFAULT_SPEED_Y = 6;
+	public static final int DEFAULT_SPEED_Y = 5;
 	public static final int SPEED_MOL = 2;
 	public static final int RANGE = CGraphics.TILE_SIZE / 2;
-	public static final int DEFAULT_LIFE = 10;
+	public static final int DEFAULT_LIFE = 3;
 	public static final int DAMAGE = 1;
+
+	public static final int POSX_IN_SET = 64;
+	public static final int POSY_IN_SET = 0;
 
 	private int m_posx;
 	private int m_posy;
 	private int m_speedx;
 	private int m_speedy;
 	private int m_life;
-	private BufferedImage m_img;
 
 	CEnemy() {
 		m_posy = -CGraphics.TILE_SIZE;
@@ -28,11 +24,6 @@ public class CEnemy {
 		if (m_speedy <= 0)
 			m_speedy = 1;
 
-		try {
-			m_img = ImageIO.read(new File(NAME_PATH));
-		} catch (IOException e) {
-			m_img = new BufferedImage(CGraphics.TILE_SIZE, CGraphics.TILE_SIZE, BufferedImage.TYPE_INT_RGB);
-		}
 	}
 
 	CEnemy(int posx) {
@@ -44,11 +35,6 @@ public class CEnemy {
 		if (m_speedy <= 0)
 			m_speedy = 1;
 
-		try {
-			m_img = ImageIO.read(new File(NAME_PATH));
-		} catch (IOException e) {
-			m_img = new BufferedImage(CGraphics.SCREEN_SIZE_X, CGraphics.SCREEN_SIZE_Y, BufferedImage.TYPE_INT_RGB);
-		}
 	}
 
 	public void procc() {
@@ -65,15 +51,12 @@ public class CEnemy {
 	}
 
 	public boolean isOutOfBound() {
-		return (m_posy > (CGraphics.NB_TILE_Y) * CGraphics.TILE_SIZE);
-	}
-
-	public BufferedImage getImg() {
-		return m_img;
+		return (m_posy > (CGraphics.NB_TILE_Y) * CGraphics.TILE_SIZE || m_posy < -CGraphics.TILE_SIZE);
 	}
 
 	public void looseHP(int x) {
 		m_life -= x;
+		m_speedy -= 1;
 	}
 
 	public int getPosx() {
@@ -110,6 +93,14 @@ public class CEnemy {
 
 	public void setPosy(int y) {
 		m_posy = y;
+	}
+
+	public int getPosxInSet() {
+		return POSX_IN_SET;
+	}
+
+	public int getPosyInSet() {
+		return POSY_IN_SET;
 	}
 
 }

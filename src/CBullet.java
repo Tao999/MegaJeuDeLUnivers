@@ -1,21 +1,17 @@
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-
-import javax.imageio.ImageIO;
 
 public class CBullet {
-	static final String NAME_PATH = "gfx/bullet.png";
 	public static final int DEFAULT_SPEED_Y = 7;
-	public static final int DAMAGE = 9;
+	public static final int DAMAGE = 1;
 	public static final int RANGE = 10 / 2;
+
+	public static final int POSX_IN_SET = 32;
+	public static final int POSY_IN_SET = 0;
 
 	private int m_posx;
 	private int m_posy;
 	private int m_speedx;
 	private int m_speedy;
 	private boolean m_ally;
-	private BufferedImage m_img;
 
 	CBullet(int x, int y, boolean isAlly) {
 		m_speedx = 0;
@@ -23,11 +19,6 @@ public class CBullet {
 		m_posx = x;
 		m_posy = y;
 		m_ally = isAlly;
-		try {
-			m_img = ImageIO.read(new File(NAME_PATH));
-		} catch (IOException e) {
-			m_img = new BufferedImage(CGraphics.TILE_SIZE, CGraphics.TILE_SIZE, BufferedImage.TYPE_INT_RGB);
-		}
 	}
 
 	CBullet(int x, int y, int vectSpeedX, int vectSpeedY, boolean isAlly) {
@@ -41,12 +32,6 @@ public class CBullet {
 
 		m_speedx = vectSpeedX;
 		m_ally = isAlly;
-
-		try {
-			m_img = ImageIO.read(new File(NAME_PATH));
-		} catch (IOException e) {
-			m_img = null;
-		}
 	}
 
 	public boolean isAlly() {
@@ -64,16 +49,20 @@ public class CBullet {
 				|| (m_posy > (CGraphics.NB_TILE_Y) * CGraphics.TILE_SIZE);
 	}
 
-	public BufferedImage getImg() {
-		return m_img;
-	}
-
 	public int getPosx() {
 		return m_posx;
 	}
 
 	public int getPosy() {
 		return m_posy;
+	}
+
+	public int getPosxInSet() {
+		return POSX_IN_SET;
+	}
+
+	public int getPosyInSet() {
+		return POSY_IN_SET;
 	}
 
 }

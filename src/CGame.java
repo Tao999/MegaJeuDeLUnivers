@@ -6,54 +6,44 @@ import java.util.ArrayList;
 import javax.imageio.ImageIO;
 
 public class CGame {
-	public final static int GAME_STATUS_MSK = 0b11;
-	public final static int RUNNING = 0b01;
-	public final static int PAUSE = 0b10;
-	public final static int LOST = 0b11;
+	public final static int GAME_STATUS_MSK = 0b111;
+	public final static int RUNNING = 0b001;
+	public final static int PAUSE = 0b010;
+	public final static int LOST = 0b100;
 
 	public final static int MAX_SPAWN_ASTEROID = 2;
-	public final static int SPAWN_SMOKE_RATE = 4;
-	public final static int SPAWN_ENEMY_RATE = 8;
+	public final static int SPAWN_ENEMY_RATE = 11;
 	public final static int COUNTER_COLLISION_BUG = 3;
 	public final static int NB_SCORE_TO_BLAST = 3;
 
-	static final String NUMERICS_PATH = "gfx/numerics.png";
+	public final static int POSX_NUMERIC = 96;
+	public final static int POSY_NUMERIC = 32;
+
+	static final String GFXSET_PATH = "gfx/GFXSet.png";
 
 	private CFlag m_status;
 	private CPlayer m_player;
 	private ArrayList<CBullet> m_bullets;
-	private ArrayList<CSmoke> m_smokes;
 	private ArrayList<CEnemy> m_enemies;
 	private ArrayList<CExplosion> m_explosions;
 	private int m_count;
 	private int m_score;
-	private BufferedImage m_numericsImg;
 
 	CGame() {
 		m_status = new CFlag();
 		m_status.bitSet(RUNNING);
 		m_count = 0;
 		m_bullets = new ArrayList<CBullet>();
-		m_smokes = new ArrayList<CSmoke>();
 		m_enemies = new ArrayList<CEnemy>();
 		m_explosions = new ArrayList<CExplosion>();
 
 		m_player = new CPlayer();
 
-		try {
-			m_numericsImg = ImageIO.read(new File(NUMERICS_PATH));
-		} catch (IOException e) {
-			m_numericsImg = new BufferedImage(CGraphics.TILE_SIZE, CGraphics.TILE_SIZE, BufferedImage.TYPE_INT_RGB);
-		}
 	}
 
 	public void proccGame(CFlag kbStatus) {
-		
-		for (int i = 0; i < m_smokes.size() && i >= 0; i++) {
-			m_smokes.get(i).procc();
-			if (m_smokes.get(i).isOutOfBound())
-				m_smokes.remove(i--);
-		}
+		if (m_status.isBitSet(PAUSE))
+			return;
 
 		// procc joueur
 		m_player.procc(kbStatus);
@@ -138,17 +128,13 @@ public class CGame {
 				m_enemies.remove(i--);
 
 		}
-		if (m_status.getMsk(GAME_STATUS_MSK) != RUNNING) {
+		if (m_status.isBitSet(LOST)) {
 			for (int i = 0; i < m_enemies.size(); i++) {
 				m_explosions.add(new CExplosion(m_enemies.get(i).getPosx(), m_enemies.get(i).getPosy()));
 			}
 			m_enemies.clear();
 			return;
 		}
-
-		// fumée
-		if (m_count % SPAWN_SMOKE_RATE == 0)
-			m_smokes.add(new CSmoke(m_player.getPosx(), m_player.getPosy() + CGraphics.TILE_SIZE / 3));
 
 		// spawn enemis
 		if (m_count % SPAWN_ENEMY_RATE == 0) {
@@ -185,46 +171,46 @@ public class CGame {
 
 	public ArrayList<CSprite> getSpritesToBlast() {
 		ArrayList<CSprite> m_sprites = new ArrayList<CSprite>();
-		// chargement de la fumé
-		for (int i = 0; i < m_smokes.size(); i++) {
-			CSmoke tempSmoke = m_smokes.get(i);
-			m_sprites.add(new CSprite(tempSmoke.getImg(), tempSmoke.getPosx(), tempSmoke.getPosy()));
-		}
 
 		// chargement des bullets
 		for (int i = 0; i < m_bullets.size(); i++) {
 			CBullet tempBullet = m_bullets.get(i);
-			m_sprites.add(new CSprite(tempBullet.getImg(), tempBullet.getPosx(), tempBullet.getPosy()));
+			m_sprites.add(new CSprite(tempBullet.getPosx(), tempBullet.getPosy(), tempBullet.getPosxInSet(),
+					tempBullet.getPosyInSet()));
 		}
 
 		// chargement des ennemies
 		for (int i = 0; i < m_enemies.size(); i++) {
 			CEnemy tempEnemy = m_enemies.get(i);
-			m_sprites.add(new CSprite(tempEnemy.getImg(), tempEnemy.getPosx(), tempEnemy.getPosy()));
+			m_sprites.add(new CSprite(tempEnemy.getPosx(), tempEnemy.getPosy(), tempEnemy.getPosxInSet(),
+					tempEnemy.getPosyInSet()));
 		}
 
 		// chargement des explosions
 		for (int i = 0; i < m_explosions.size(); i++) {
 			CExplosion tempExplosion = m_explosions.get(i);
-			m_sprites.add(new CSprite(tempExplosion.getImg(), tempExplosion.getPosx(), tempExplosion.getPosy()));
+			m_sprites.add(new CSprite(tempExplosion.getPosx(), tempExplosion.getPosy(), tempExplosion.getPosxInSet(),
+					tempExplosion.getPosyInSet()));
 		}
 
 		// chargement du perso
-		if (m_status.getMsk(GAME_STATUS_MSK) == RUNNING)
-			m_sprites.add(new CSprite(m_player.getImg(), m_player.getPosx(), m_player.getPosy()));
+		if (m_status.isBitClr(LOST))
+			m_sprites.add(new CSprite(m_player.getPosx(), m_player.getPosy(), m_player.getCharPosxInSet(),
+					m_player.getCharPosyInSet()));
 
 		// chargement de la barre de vie
 		for (int i = 0; i < CPlayer.PLAYER_LIFE_MAX; i++) {
-			m_sprites.add(new CSprite(m_player.getLifePoint(m_player.getLife() / (i + 1) >= 1), i * CGraphics.TILE_SIZE,
-					(CGraphics.NB_TILE_Y - 1) * CGraphics.TILE_SIZE));
+			m_sprites.add(new CSprite(i * CGraphics.TILE_SIZE, (CGraphics.NB_TILE_Y - 1) * CGraphics.TILE_SIZE,
+					m_player.getLifePosxInSet(m_player.getLife() / (i + 1) >= 1), m_player.getLifePosyInSet()));
 		}
 
 		// chargement du score
 		for (int i = 0; i < NB_SCORE_TO_BLAST; i++) {
-			m_sprites.add(new CSprite(getNumericScore((int) (m_score / Math.pow(10, i))),
+			m_sprites.add(new CSprite(
 					(int) (CGraphics.NB_TILE_X / 2 - 2) * CGraphics.TILE_SIZE
 							+ (NB_SCORE_TO_BLAST - i) * CGraphics.TILE_SIZE,
-					0));
+					0, getPosxNumericScore((int) (m_score / Math.pow(10, i)) % 10),
+					getPosyNumericScore((int) (m_score / Math.pow(10, i)) % 10)));
 		}
 
 		return m_sprites;
@@ -237,13 +223,13 @@ public class CGame {
 	}
 
 	public void pressEscape() {
-		if (m_status.getMsk(GAME_STATUS_MSK) == RUNNING) {
+		if (m_status.isBitSet(RUNNING)) {
 			m_player.setSpeedx(0);
 			m_player.setSpeedy(0);
-			m_status.bitClr(GAME_STATUS_MSK);
+			m_status.bitClr(RUNNING);
 			m_status.bitSet(PAUSE);
-		} else if (m_status.getMsk(GAME_STATUS_MSK) == PAUSE) {
-			m_status.bitClr(GAME_STATUS_MSK);
+		} else if (m_status.isBitSet(PAUSE)) {
+			m_status.bitClr(PAUSE);
 			m_status.bitSet(RUNNING);
 		}
 	}
@@ -254,7 +240,14 @@ public class CGame {
 		return false;
 	}
 
-	public BufferedImage getNumericScore(int i) {
-		return m_numericsImg.getSubimage(i % 10 * CGraphics.TILE_SIZE, 0, CGraphics.TILE_SIZE, CGraphics.TILE_SIZE);
+	public int getPosxNumericScore(int i) {
+		return (POSX_NUMERIC + (i * CGraphics.TILE_SIZE)) % (CGraphics.TILE_SIZE * (CGraphics.GFXSET_SIZE_SIDE));
+
+	}
+
+	public int getPosyNumericScore(int i) {
+		if (i <= 4)
+			return POSY_NUMERIC;
+		return POSY_NUMERIC + CGraphics.TILE_SIZE;
 	}
 }

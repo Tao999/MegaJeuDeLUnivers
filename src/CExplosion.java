@@ -1,28 +1,20 @@
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-
-import javax.imageio.ImageIO;
 
 public class CExplosion {
-	static final String NAME_PATH = "gfx/explosion.png";
 	public static final int NB_STEP = 6;
 	public static final int FRAME_BY_STEP = 2;
+
+	public static final int POSX_IN_SET = 96;
+	public static final int POSY_IN_SET = 0;
 
 	private int m_count;
 	private int m_posx;
 	private int m_posy;
-	private BufferedImage m_img;
 
 	CExplosion(int posx, int posy) {
 		m_posx = posx;
 		m_posy = posy;
 		m_count = 0;
-		try {
-			m_img = ImageIO.read(new File(NAME_PATH));
-		} catch (IOException e) {
-			m_img = new BufferedImage(CGraphics.TILE_SIZE, CGraphics.TILE_SIZE, BufferedImage.TYPE_INT_RGB);
-		}
+
 	}
 
 	public void procc() {
@@ -41,7 +33,16 @@ public class CExplosion {
 		return m_posy;
 	}
 
-	public BufferedImage getImg() {
-		return m_img.getSubimage((m_count / FRAME_BY_STEP % NB_STEP)*CGraphics.TILE_SIZE, 0, CGraphics.TILE_SIZE, CGraphics.TILE_SIZE);
+	public int getPosxInSet() {
+		return (POSX_IN_SET + ((m_count / FRAME_BY_STEP % NB_STEP) * CGraphics.TILE_SIZE))
+				% (CGraphics.GFXSET_SIZE_SIDE * CGraphics.TILE_SIZE);
 	}
+
+	public int getPosyInSet() {
+		if (m_count / FRAME_BY_STEP <= 4)
+			return POSY_IN_SET;
+		else
+			return POSY_IN_SET + CGraphics.TILE_SIZE;
+	}
+
 }

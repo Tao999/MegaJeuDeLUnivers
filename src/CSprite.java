@@ -1,25 +1,15 @@
-import java.awt.image.BufferedImage;
-
 
 public class CSprite {
-	private BufferedImage m_img;
 	private int m_posx;
 	private int m_posy;
+	private int m_posxInSet;
+	private int m_posyInSet;
 
-	public CSprite() {
-		m_img = null;
-		m_posx = 0;
-		m_posy = 0;
-	}
-
-	public CSprite(BufferedImage img, int posx, int posy) {
-		m_img = img;
+	public CSprite(int posx, int posy, int posxInSet, int posyInSet) {
 		m_posx = posx;
 		m_posy = posy;
-	}
-	
-	public BufferedImage getImg() {
-		return m_img;
+		m_posxInSet = posxInSet;
+		m_posyInSet = posyInSet;
 	}
 
 	public int getPosx() {
@@ -28,5 +18,13 @@ public class CSprite {
 
 	public int getPosy() {
 		return m_posy;
+	}
+
+	public int getPosxInSet() {
+		return m_posxInSet;
+	}
+
+	public int getPosyInSet() {
+		return m_posyInSet;
 	}
 }

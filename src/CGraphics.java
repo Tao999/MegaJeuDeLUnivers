@@ -1,7 +1,5 @@
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -18,12 +16,24 @@ public class CGraphics extends JPanel {
 	static final int NB_TILE_Y = 15;
 	static final int SCREEN_SIZE_X = NB_TILE_X * TILE_SIZE * SCREEN_ZOOM;
 	static final int SCREEN_SIZE_Y = NB_TILE_Y * TILE_SIZE * SCREEN_ZOOM;
+	public static final int GFXSET_SIZE_SIDE = 8;
 
 	private BufferedImage buf;
+	private BufferedImage m_GFXSet;
 
 	CGraphics() {
 		setPreferredSize(new Dimension(SCREEN_SIZE_X, SCREEN_SIZE_Y));
 		buf = new BufferedImage(SCREEN_SIZE_X, SCREEN_SIZE_Y, BufferedImage.TYPE_INT_RGB);
+	}
+
+	public void setGFXSet(String path) {
+		try {
+			m_GFXSet = ImageIO.read(new File(path));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			m_GFXSet = new BufferedImage(CGraphics.GFXSET_SIZE_SIDE * CGraphics.TILE_SIZE,
+					CGraphics.GFXSET_SIZE_SIDE * CGraphics.TILE_SIZE, BufferedImage.TYPE_INT_RGB);
+		}
 	}
 
 	public void blastSprites(ArrayList<CSprite> sprites) {
@@ -46,8 +56,11 @@ public class CGraphics extends JPanel {
 		CSprite tempSprite;
 		for (int i = 0; i < sprites.size(); i++) {
 			tempSprite = sprites.get(i);
-			g.drawImage(tempSprite.getImg(), tempSprite.getPosx() * SCREEN_ZOOM, tempSprite.getPosy() * SCREEN_ZOOM,
-					tempSprite.getImg().getWidth() * SCREEN_ZOOM, tempSprite.getImg().getHeight() * SCREEN_ZOOM, this);
+			g.drawImage(
+					m_GFXSet.getSubimage(tempSprite.getPosxInSet(), tempSprite.getPosyInSet(), TILE_SIZE, TILE_SIZE),
+					tempSprite.getPosx() * SCREEN_ZOOM, tempSprite.getPosy() * SCREEN_ZOOM, TILE_SIZE * SCREEN_ZOOM,
+					TILE_SIZE * SCREEN_ZOOM, this);
+
 		}
 
 		// call blast

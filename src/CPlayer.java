@@ -1,8 +1,3 @@
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-
-import javax.imageio.ImageIO;
 
 public class CPlayer {
 	static final int KB_PLAYER_UP = 0b00001;
@@ -12,8 +7,6 @@ public class CPlayer {
 	static final int KB_PLAYER_SHOT = 0b10000;
 	static final int KB_PLAYER_MASK = 0b11111;
 
-	static final String NAME_PATH = "gfx/ship.png";
-	static final String LIFE_PATH = "gfx/lifebar.png";
 	static final int PLAYER_SPEED = 5;
 	static final int PLAYER_STRAFE_SPEED = (int) Math.ceil((double) Math.sqrt(2) / (double) 2 * (double) PLAYER_SPEED);
 	// static final int PLAYER_FRICTION = 5;
@@ -21,12 +14,16 @@ public class CPlayer {
 	static final int PLAYER_LIFE_MAX = CGraphics.NB_TILE_X;
 	static final int HITBOX = 10;
 
+	public static final int CHAR_POSX_IN_SET = 0;
+	public static final int CHAR_POSY_IN_SET = 0;
+
+	public static final int LIFE_POSX_IN_SET = 32;
+	public static final int LIFE_POSY_IN_SET = 32;
+
 	private int m_posx;
 	private int m_posy;
 	private int m_speedx;
 	private int m_speedy;
-	private BufferedImage m_img;
-	private BufferedImage m_lifBar;
 	private int m_shotCoolDown;
 	private int m_life;
 
@@ -38,17 +35,6 @@ public class CPlayer {
 		m_speedy = 0;
 		m_life = PLAYER_LIFE_MAX;
 
-		try {
-			m_img = ImageIO.read(new File(NAME_PATH));
-		} catch (IOException e) {
-			m_img = new BufferedImage(CGraphics.TILE_SIZE, CGraphics.TILE_SIZE, BufferedImage.TYPE_INT_RGB);
-		}
-
-		try {
-			m_lifBar = ImageIO.read(new File(LIFE_PATH));
-		} catch (IOException e) {
-			m_lifBar = new BufferedImage(CGraphics.TILE_SIZE, CGraphics.TILE_SIZE, BufferedImage.TYPE_INT_RGB);
-		}
 	}
 
 	public boolean isShooting(CFlag kbStatus) {
@@ -104,8 +90,8 @@ public class CPlayer {
 		// collisions limite
 		if (m_posx < 0)
 			m_posx = 0;
-		if (m_posy < 0)
-			m_posy = 0;
+		if (m_posy < CGraphics.TILE_SIZE)
+			m_posy = CGraphics.TILE_SIZE;
 		if (m_posx > (CGraphics.NB_TILE_X - 1) * CGraphics.TILE_SIZE)
 			m_posx = (CGraphics.NB_TILE_X - 1) * CGraphics.TILE_SIZE;
 		if (m_posy > (CGraphics.NB_TILE_Y - 2) * CGraphics.TILE_SIZE)
@@ -159,13 +145,21 @@ public class CPlayer {
 		return m_life;
 	}
 
-	public BufferedImage getImg() {
-		return m_img;
+	public int getCharPosxInSet() {
+		return CHAR_POSX_IN_SET;
 	}
 
-	public BufferedImage getLifePoint(boolean isContainHP) {
+	public int getCharPosyInSet() {
+		return CHAR_POSY_IN_SET;
+	}
+
+	public int getLifePosxInSet(boolean isContainHP) {
 		if (isContainHP)
-			return m_lifBar.getSubimage(0, 0, CGraphics.TILE_SIZE, CGraphics.TILE_SIZE);
-		return m_lifBar.getSubimage(CGraphics.TILE_SIZE, 0, CGraphics.TILE_SIZE, CGraphics.TILE_SIZE);
+			return LIFE_POSX_IN_SET;
+		return LIFE_POSX_IN_SET + CGraphics.TILE_SIZE;
+	}
+
+	public int getLifePosyInSet() {
+		return LIFE_POSY_IN_SET;
 	}
 }
