@@ -10,6 +10,13 @@ import javax.swing.JPanel;
 import java.util.ArrayList;
 
 public class CGraphics extends JPanel {
+	static final int TILESET_CODE_SPRITE = 0;
+	static final int TILESET_CODE_FONT = 1;
+
+	static final int CHAR_START = '0';
+	static final int CHAR_FINAL = 'Z';
+	static final int CHAR_ERR_X = 0;
+	static final int CHAR_ERR_Y = 64;
 	static final int SCREEN_ZOOM = 2;
 	static final int TILE_SIZE = 32;
 	static final int NB_TILE_X = 13;
@@ -17,20 +24,22 @@ public class CGraphics extends JPanel {
 	static final int SCREEN_SIZE_X = NB_TILE_X * TILE_SIZE * SCREEN_ZOOM;
 	static final int SCREEN_SIZE_Y = NB_TILE_Y * TILE_SIZE * SCREEN_ZOOM;
 	public static final int GFXSET_SIZE_SIDE = 8;
+	public static final int FONT_SIZE_SIDE = 8;
 
 	private BufferedImage buf;
 	private BufferedImage m_GFXSet;
+	private BufferedImage m_font;
 
 	CGraphics() {
 		setPreferredSize(new Dimension(SCREEN_SIZE_X, SCREEN_SIZE_Y));
 		buf = new BufferedImage(SCREEN_SIZE_X, SCREEN_SIZE_Y, BufferedImage.TYPE_INT_RGB);
 	}
 
-	public void setGFXSet(String path) {
+	public void setGFXSet(String gfxPath, String fontPath) {
 		try {
-			m_GFXSet = ImageIO.read(new File(path));
+			m_GFXSet = ImageIO.read(new File(gfxPath));
+			m_font = ImageIO.read(new File(fontPath));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			m_GFXSet = new BufferedImage(CGraphics.GFXSET_SIZE_SIDE * CGraphics.TILE_SIZE,
 					CGraphics.GFXSET_SIZE_SIDE * CGraphics.TILE_SIZE, BufferedImage.TYPE_INT_RGB);
 		}
@@ -56,11 +65,18 @@ public class CGraphics extends JPanel {
 		CSprite tempSprite;
 		for (int i = 0; i < sprites.size(); i++) {
 			tempSprite = sprites.get(i);
-			g.drawImage(
-					m_GFXSet.getSubimage(tempSprite.getPosxInSet(), tempSprite.getPosyInSet(), TILE_SIZE, TILE_SIZE),
-					tempSprite.getPosx() * SCREEN_ZOOM, tempSprite.getPosy() * SCREEN_ZOOM, TILE_SIZE * SCREEN_ZOOM,
-					TILE_SIZE * SCREEN_ZOOM, this);
-
+			if (tempSprite.getTileSetToUse() == TILESET_CODE_SPRITE)
+				g.drawImage(
+						m_GFXSet.getSubimage(tempSprite.getPosxInGraphicSet(), tempSprite.getPosyInGraphicSet(),
+								TILE_SIZE, TILE_SIZE),
+						tempSprite.getPosx() * SCREEN_ZOOM, tempSprite.getPosy() * SCREEN_ZOOM, TILE_SIZE * SCREEN_ZOOM,
+						TILE_SIZE * SCREEN_ZOOM, this);
+			else if(tempSprite.getTileSetToUse() == TILESET_CODE_FONT)
+				g.drawImage(
+						m_font.getSubimage(tempSprite.getPosxInGraphicSet(), tempSprite.getPosyInGraphicSet(),
+								TILE_SIZE, TILE_SIZE),
+						tempSprite.getPosx() * SCREEN_ZOOM, tempSprite.getPosy() * SCREEN_ZOOM, TILE_SIZE * SCREEN_ZOOM,
+						TILE_SIZE * SCREEN_ZOOM, this);
 		}
 
 		// call blast

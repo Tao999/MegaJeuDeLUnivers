@@ -2,14 +2,16 @@
 public class CSprite {
 	private int m_posx;
 	private int m_posy;
-	private int m_posxInSet;
-	private int m_posyInSet;
+	private int m_posxInGraphicSet;
+	private int m_posyInGraphicSet;
+	private int m_tileSetToUse;
 
-	public CSprite(int posx, int posy, int posxInSet, int posyInSet) {
+	public CSprite(int posx, int posy, int posxInGraphicSet, int posyInGraphicSet, int tileSetToUse) {
 		m_posx = posx;
 		m_posy = posy;
-		m_posxInSet = posxInSet;
-		m_posyInSet = posyInSet;
+		m_posxInGraphicSet = posxInGraphicSet;
+		m_posyInGraphicSet = posyInGraphicSet;
+		m_tileSetToUse = tileSetToUse;
 	}
 
 	public int getPosx() {
@@ -20,11 +22,15 @@ public class CSprite {
 		return m_posy;
 	}
 
-	public int getPosxInSet() {
-		return m_posxInSet;
+	public int getPosxInGraphicSet() {
+		return m_posxInGraphicSet;
 	}
 
-	public int getPosyInSet() {
-		return m_posyInSet;
+	public int getPosyInGraphicSet() {
+		return m_posyInGraphicSet;
+	}
+	
+	public int getTileSetToUse() {
+		return m_tileSetToUse;
 	}
 }
