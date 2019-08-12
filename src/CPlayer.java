@@ -7,7 +7,7 @@ public class CPlayer {
 	static final int KB_PLAYER_SHOT = 0b10000;
 	static final int KB_PLAYER_MASK = 0b11111;
 
-	static final int PLAYER_SPEED = 5;
+	static final int PLAYER_SPEED = 3;
 	static final int PLAYER_STRAFE_SPEED = (int) Math.ceil((double) Math.sqrt(2) / (double) 2 * (double) PLAYER_SPEED);
 	// static final int PLAYER_FRICTION = 5;
 	static final int PLAYER_SHOT_COOLDOWN = 9;
@@ -28,13 +28,15 @@ public class CPlayer {
 	private int m_life;
 
 	CPlayer() {
-		m_shotCoolDown = 0;
+		resetPlayer();
+	}
+
+	public void resetPlayer() {
 		m_posx = CGraphics.NB_TILE_X / 2 * CGraphics.TILE_SIZE;
-		m_posy = CGraphics.TILE_SIZE * (CGraphics.NB_TILE_Y - 1);
+		m_posy = CGraphics.TILE_SIZE * (CGraphics.NB_TILE_Y - 2);
 		m_speedx = 0;
 		m_speedy = 0;
 		m_life = PLAYER_LIFE_MAX;
-
 	}
 
 	public boolean isShooting(CFlag kbStatus) {
@@ -51,6 +53,8 @@ public class CPlayer {
 		if (--m_shotCoolDown < 0)
 			m_shotCoolDown = 0;
 
+		m_speedx=0;
+		m_speedy=0;
 		// set la vitesse au max
 		if (kbStatus.isBitSet(KB_PLAYER_UP) && kbStatus.isBitClr(KB_PLAYER_DOWN))
 			m_speedy = -PLAYER_SPEED;

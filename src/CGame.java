@@ -1,15 +1,11 @@
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
-import javax.imageio.ImageIO;
-
 public class CGame {
-	public final static int GAME_STATUS_MSK = 0b111;
-	public final static int RUNNING = 0b001;
-	public final static int PAUSE = 0b010;
-	public final static int LOST = 0b100;
+	public final static int GAME_STATUS_MSK = 0b1111;
+	public final static int GAME_STATUS_RUNNING = 0b0001;
+	public final static int GAME_STATUS_PAUSE = 0b0010;
+	public final static int GAME_STATUS_LOST = 0b0100;
+	public final static int GAME_STATUS_STARTING = 0b1000;
 
 	public final static int MAX_SPAWN_ASTEROID = 2;
 	public final static int SPAWN_ENEMY_RATE = 11;
@@ -31,7 +27,7 @@ public class CGame {
 
 	CGame() {
 		m_status = new CFlag();
-		m_status.bitSet(RUNNING);
+		m_status.bitSet(GAME_STATUS_STARTING);
 		m_count = 0;
 		m_bullets = new ArrayList<CBullet>();
 		m_enemies = new ArrayList<CEnemy>();
@@ -41,10 +37,14 @@ public class CGame {
 
 	}
 
-	public void proccGame(CFlag kbStatus) {
-		if (m_status.isBitSet(PAUSE))
-			return;
+	private void startingNewGame() {
+		m_count = 0;
+		m_status.bitClr(GAME_STATUS_MSK);
+		m_status.bitSet(GAME_STATUS_STARTING);
+		m_player.resetPlayer();
+	}
 
+	private void proccEntities(CFlag kbStatus) {
 		// procc joueur
 		m_player.procc(kbStatus);
 
@@ -87,7 +87,7 @@ public class CGame {
 							+ (m_enemies.get(i).getPosy() - m_enemies.get(j).getPosy())
 									* (m_enemies.get(i).getPosy() - m_enemies.get(j).getPosy()))
 							+ 2;
-					double overlap = (distance - CGraphics.TILE_SIZE - COUNTER_COLLISION_BUG) / 2;
+					double overlap = (distance - CEnemy.RANGE * 2 - COUNTER_COLLISION_BUG) / 2;
 					// déplacement asteroid j
 					m_enemies.get(i).setPosx((int) (m_enemies.get(i).getPosx()
 							- overlap * (m_enemies.get(i).getPosx() - m_enemies.get(j).getPosx()) / distance));
@@ -111,7 +111,13 @@ public class CGame {
 				m_player.looseHp(CEnemy.DAMAGE);
 				if (m_player.getLife() == 0) {
 					m_explosions.add(new CExplosion(m_player.getPosx(), m_player.getPosy()));
-					m_status.bitSet(LOST);
+					m_status.bitSet(GAME_STATUS_LOST);
+					startingNewGame();
+					for (int k = 0; k < m_enemies.size(); k++) {
+						m_explosions.add(new CExplosion(m_enemies.get(k).getPosx(), m_enemies.get(k).getPosy()));
+					}
+					m_enemies.clear();
+					return;
 				}
 				if (i < 0)
 					i = 0;
@@ -128,16 +134,9 @@ public class CGame {
 				m_enemies.remove(i--);
 
 		}
-		if (m_status.isBitSet(LOST)) {
-			for (int i = 0; i < m_enemies.size(); i++) {
-				m_explosions.add(new CExplosion(m_enemies.get(i).getPosx(), m_enemies.get(i).getPosy()));
-			}
-			m_enemies.clear();
-			return;
-		}
 
 		// spawn enemis
-		if (m_count % SPAWN_ENEMY_RATE == 0) {
+		if (m_status.isBitSet(GAME_STATUS_RUNNING) && m_count % SPAWN_ENEMY_RATE == SPAWN_ENEMY_RATE - 1) {
 			// spawn des i asteroids
 			for (int i = 0; i < MAX_SPAWN_ASTEROID; i++) {
 				m_enemies.add(new CEnemy());
@@ -156,10 +155,27 @@ public class CGame {
 			}
 		}
 
+		if (m_status.isBitSet(GAME_STATUS_STARTING))
+			return;
 		// Tire
 		if (m_player.isShooting(kbStatus))
 			m_bullets.add(new CBullet(m_player.getPosx(), m_player.getPosy() - CGraphics.TILE_SIZE / 2,
 					m_player.getSpeedx(), m_player.getSpeedy(), true));
+
+	}
+
+	public void proccGame(CFlag kbStatus) {
+		if (m_status.isBitSet(GAME_STATUS_PAUSE))
+			return;
+		else if (m_status.isBitSet(GAME_STATUS_RUNNING)) {
+			proccEntities(kbStatus);
+		} else if (m_status.isBitSet(GAME_STATUS_STARTING)) {
+			proccEntities(kbStatus);
+			if (m_count / 59 == 3) {
+				m_status.bitClr(GAME_STATUS_MSK);
+				m_status.bitSet(GAME_STATUS_RUNNING);
+			}
+		}
 
 		// PAS TOUCHE
 		m_count++;
@@ -194,7 +210,7 @@ public class CGame {
 		}
 
 		// chargement du perso
-		if (m_status.isBitClr(LOST))
+		if (m_status.isBitClr(GAME_STATUS_LOST) || m_status.isBitSet(GAME_STATUS_STARTING))
 			m_sprites.add(new CSprite(m_player.getPosx(), m_player.getPosy(), m_player.getCharPosxInSet(),
 					m_player.getCharPosyInSet()));
 
@@ -213,24 +229,24 @@ public class CGame {
 					getPosyNumericScore((int) (m_score / Math.pow(10, i)) % 10)));
 		}
 
+		// chargement du compte à rebour
+		if (m_status.isBitSet(GAME_STATUS_STARTING)) {
+			m_sprites.add(new CSprite(CGraphics.TILE_SIZE * (CGraphics.NB_TILE_X - 1) / 2,
+					CGraphics.TILE_SIZE * (CGraphics.NB_TILE_Y-1) / 2, getPosxNumericScore(3 - m_count / 60),
+					getPosyNumericScore(3 - m_count / 60)));
+		}
 		return m_sprites;
 	}
 
-	public boolean isRunning() {
-		if (m_status.getMsk(GAME_STATUS_MSK) == RUNNING)
-			return true;
-		return false;
-	}
-
 	public void pressEscape() {
-		if (m_status.isBitSet(RUNNING)) {
+		if (m_status.isBitSet(GAME_STATUS_RUNNING)) {
 			m_player.setSpeedx(0);
 			m_player.setSpeedy(0);
-			m_status.bitClr(RUNNING);
-			m_status.bitSet(PAUSE);
-		} else if (m_status.isBitSet(PAUSE)) {
-			m_status.bitClr(PAUSE);
-			m_status.bitSet(RUNNING);
+			m_status.bitClr(GAME_STATUS_RUNNING);
+			m_status.bitSet(GAME_STATUS_PAUSE);
+		} else if (m_status.isBitSet(GAME_STATUS_PAUSE)) {
+			m_status.bitClr(GAME_STATUS_PAUSE);
+			m_status.bitSet(GAME_STATUS_RUNNING);
 		}
 	}
 
