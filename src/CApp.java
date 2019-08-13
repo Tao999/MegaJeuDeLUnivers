@@ -10,8 +10,15 @@ public class CApp extends JFrame implements KeyListener {
 	static final String ICON_PATH = "gfx/icon.png";
 	static final long PROCC_REVOVERY = 16;
 
+	static final int KB_UP = 0b1;
+	static final int KB_RIGHT = 0b10;
+	static final int KB_DOWN = 0b100;
+	static final int KB_LEFT = 0b1000;
+	static final int KB_ESCAPE = 0b10000;
+	static final int KB_SPACE = 0b100000;
+
 	private ImageIcon m_icon;
-	private CFlag m_kbStatus;
+	private static volatile CFlag m_kbStatus;
 	private CGraphics m_graphics;
 	private CGame m_game;
 	private Thread m_thread;
@@ -59,7 +66,7 @@ public class CApp extends JFrame implements KeyListener {
 
 					fpsCheck = timeRegulator = System.currentTimeMillis();
 					// if(m_game.isRunning())
-					m_game.proccGame(m_kbStatus);
+					m_game.proccGame();
 
 					// affichage
 					blast();
@@ -100,6 +107,10 @@ public class CApp extends JFrame implements KeyListener {
 		m_graphics.blastSprites(m_game.getSpritesToBlast());
 	}
 
+	public static CFlag getKbStatus() {
+		return m_kbStatus;
+	}
+
 	@Override
 	public void keyTyped(KeyEvent e) {
 
@@ -107,28 +118,30 @@ public class CApp extends JFrame implements KeyListener {
 
 	@Override
 	public void keyPressed(KeyEvent e) {
-		if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
-			m_game.pressEscape();
-
 		switch (e.getKeyCode()) {
 		case KeyEvent.VK_Z: // UP
-			m_kbStatus.bitSet(CPlayer.KB_PLAYER_UP);
+			m_kbStatus.bitSet(KB_UP);
 			break;
 
 		case KeyEvent.VK_D: // RIGHT
-			m_kbStatus.bitSet(CPlayer.KB_PLAYER_RIGHT);
+			m_kbStatus.bitSet(KB_RIGHT);
 			break;
 
 		case KeyEvent.VK_S: // DOWN
-			m_kbStatus.bitSet(CPlayer.KB_PLAYER_DOWN);
+			m_kbStatus.bitSet(KB_DOWN);
 			break;
 
 		case KeyEvent.VK_Q: // LEFT
-			m_kbStatus.bitSet(CPlayer.KB_PLAYER_LEFT);
+			m_kbStatus.bitSet(KB_LEFT);
 			break;
 
 		case KeyEvent.VK_SPACE: // SHOT
-			m_kbStatus.bitSet(CPlayer.KB_PLAYER_SHOT);
+			m_kbStatus.bitSet(KB_SPACE);
+			break;
+
+		case KeyEvent.VK_ESCAPE:
+			m_game.clickEscape();
+			m_kbStatus.bitSet(KB_ESCAPE);
 			break;
 
 		default:
@@ -140,23 +153,27 @@ public class CApp extends JFrame implements KeyListener {
 	public void keyReleased(KeyEvent e) {
 		switch (e.getKeyCode()) {
 		case KeyEvent.VK_Z: // UP
-			m_kbStatus.bitClr(CPlayer.KB_PLAYER_UP);
+			m_kbStatus.bitClr(KB_UP);
 			break;
 
 		case KeyEvent.VK_D: // RIGHT
-			m_kbStatus.bitClr(CPlayer.KB_PLAYER_RIGHT);
+			m_kbStatus.bitClr(KB_RIGHT);
 			break;
 
 		case KeyEvent.VK_S: // DOWN
-			m_kbStatus.bitClr(CPlayer.KB_PLAYER_DOWN);
+			m_kbStatus.bitClr(KB_DOWN);
 			break;
 
 		case KeyEvent.VK_Q: // LEFT
-			m_kbStatus.bitClr(CPlayer.KB_PLAYER_LEFT);
+			m_kbStatus.bitClr(KB_LEFT);
 			break;
 
 		case KeyEvent.VK_SPACE: // SHOT
-			m_kbStatus.bitClr(CPlayer.KB_PLAYER_SHOT);
+			m_kbStatus.bitClr(KB_SPACE);
+			break;
+
+		case KeyEvent.VK_ESCAPE:
+			m_kbStatus.bitClr(KB_ESCAPE);
 			break;
 
 		default:

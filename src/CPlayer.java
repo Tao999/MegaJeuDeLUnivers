@@ -1,17 +1,11 @@
 
-public class CPlayer {
-	static final int KB_PLAYER_UP = 0b00001;
-	static final int KB_PLAYER_RIGHT = 0b00010;
-	static final int KB_PLAYER_DOWN = 0b00100;
-	static final int KB_PLAYER_LEFT = 0b01000;
-	static final int KB_PLAYER_SHOT = 0b10000;
-	static final int KB_PLAYER_MASK = 0b11111;
+public class CPlayer extends GameObject {
 
 	static final int PLAYER_SPEED = 3;
 	static final int PLAYER_STRAFE_SPEED = (int) Math.ceil((double) Math.sqrt(2) / (double) 2 * (double) PLAYER_SPEED);
 	// static final int PLAYER_FRICTION = 5;
 	static final int PLAYER_SHOT_COOLDOWN = 9;
-	static final int PLAYER_LIFE_MAX = 1;
+	static final int PLAYER_LIFE_MAX = CGraphics.NB_TILE_X;
 	static final int HITBOX = 10;
 
 	public static final int CHAR_POSX_IN_SET = 0;
@@ -20,14 +14,11 @@ public class CPlayer {
 	public static final int LIFE_POSX_IN_SET = 32;
 	public static final int LIFE_POSY_IN_SET = 32;
 
-	private int m_posx;
-	private int m_posy;
-	private int m_speedx;
-	private int m_speedy;
 	private int m_shotCoolDown;
 	private int m_life;
 
 	CPlayer() {
+		m_type = TYPE_PLAYER;
 		resetPlayer();
 	}
 
@@ -39,50 +30,50 @@ public class CPlayer {
 		m_life = PLAYER_LIFE_MAX;
 	}
 
-	public boolean isShooting(CFlag kbStatus) {
-		if (m_shotCoolDown == 0 && kbStatus.isBitSet(KB_PLAYER_SHOT)) {
+	public boolean canShoot() {
+		if (m_shotCoolDown == 0 && CApp.getKbStatus().isBitSet(CApp.KB_SPACE)) {
 			m_shotCoolDown = PLAYER_SHOT_COOLDOWN;
 			return true;
 		}
 		return false;
 	}
 
-	// fait bouger le perso
-	public void procc(CFlag kbStatus) {
+	@Override
+	public void procc() {
 		// cooldown fire
 		if (--m_shotCoolDown < 0)
 			m_shotCoolDown = 0;
 
-		m_speedx=0;
-		m_speedy=0;
+		m_speedx = 0;
+		m_speedy = 0;
 		// set la vitesse au max
-		if (kbStatus.isBitSet(KB_PLAYER_UP) && kbStatus.isBitClr(KB_PLAYER_DOWN))
+		if (CApp.getKbStatus().isBitSet(CApp.KB_UP) && CApp.getKbStatus().isBitClr(CApp.KB_DOWN))
 			m_speedy = -PLAYER_SPEED;
-		if (kbStatus.isBitSet(KB_PLAYER_RIGHT) && kbStatus.isBitClr(KB_PLAYER_LEFT))
+		if (CApp.getKbStatus().isBitSet(CApp.KB_RIGHT) && CApp.getKbStatus().isBitClr(CApp.KB_LEFT))
 			m_speedx = PLAYER_SPEED;
-		if (kbStatus.isBitSet(KB_PLAYER_DOWN) && kbStatus.isBitClr(KB_PLAYER_UP))
+		if (CApp.getKbStatus().isBitSet(CApp.KB_DOWN) && CApp.getKbStatus().isBitClr(CApp.KB_UP))
 			m_speedy = PLAYER_SPEED;
-		if (kbStatus.isBitSet(KB_PLAYER_LEFT) && kbStatus.isBitClr(KB_PLAYER_RIGHT))
+		if (CApp.getKbStatus().isBitSet(CApp.KB_LEFT) && CApp.getKbStatus().isBitClr(CApp.KB_RIGHT))
 			m_speedx = -PLAYER_SPEED;
 
 		// gestion du strafe
-		if (kbStatus.isBitSet(KB_PLAYER_UP) && kbStatus.isBitSet(KB_PLAYER_RIGHT) && kbStatus.isBitClr(KB_PLAYER_DOWN)
-				&& kbStatus.isBitClr(KB_PLAYER_LEFT)) {
+		if (CApp.getKbStatus().isBitSet(CApp.KB_UP) && CApp.getKbStatus().isBitSet(CApp.KB_RIGHT)
+				&& CApp.getKbStatus().isBitClr(CApp.KB_DOWN) && CApp.getKbStatus().isBitClr(CApp.KB_LEFT)) {
 			m_speedx = PLAYER_STRAFE_SPEED;
 			m_speedy = -PLAYER_STRAFE_SPEED;
 		}
-		if (kbStatus.isBitSet(KB_PLAYER_UP) && kbStatus.isBitSet(KB_PLAYER_LEFT) && kbStatus.isBitClr(KB_PLAYER_DOWN)
-				&& kbStatus.isBitClr(KB_PLAYER_RIGHT)) {
+		if (CApp.getKbStatus().isBitSet(CApp.KB_UP) && CApp.getKbStatus().isBitSet(CApp.KB_LEFT)
+				&& CApp.getKbStatus().isBitClr(CApp.KB_DOWN) && CApp.getKbStatus().isBitClr(CApp.KB_RIGHT)) {
 			m_speedx = -PLAYER_STRAFE_SPEED;
 			m_speedy = -PLAYER_STRAFE_SPEED;
 		}
-		if (kbStatus.isBitSet(KB_PLAYER_DOWN) && kbStatus.isBitSet(KB_PLAYER_RIGHT) && kbStatus.isBitClr(KB_PLAYER_UP)
-				&& kbStatus.isBitClr(KB_PLAYER_LEFT)) {
+		if (CApp.getKbStatus().isBitSet(CApp.KB_DOWN) && CApp.getKbStatus().isBitSet(CApp.KB_RIGHT)
+				&& CApp.getKbStatus().isBitClr(CApp.KB_UP) && CApp.getKbStatus().isBitClr(CApp.KB_LEFT)) {
 			m_speedx = PLAYER_STRAFE_SPEED;
 			m_speedy = PLAYER_STRAFE_SPEED;
 		}
-		if (kbStatus.isBitSet(KB_PLAYER_DOWN) && kbStatus.isBitSet(KB_PLAYER_LEFT) && kbStatus.isBitClr(KB_PLAYER_UP)
-				&& kbStatus.isBitClr(KB_PLAYER_RIGHT)) {
+		if (CApp.getKbStatus().isBitSet(CApp.KB_DOWN) && CApp.getKbStatus().isBitSet(CApp.KB_LEFT)
+				&& CApp.getKbStatus().isBitClr(CApp.KB_UP) && CApp.getKbStatus().isBitClr(CApp.KB_RIGHT)) {
 			m_speedx = -PLAYER_STRAFE_SPEED;
 			m_speedy = PLAYER_STRAFE_SPEED;
 		}
@@ -102,9 +93,9 @@ public class CPlayer {
 			m_posy = (CGraphics.NB_TILE_Y - 2) * CGraphics.TILE_SIZE;
 
 		// gestion des speed
-		if (kbStatus.isBitClr(KB_PLAYER_DOWN) && kbStatus.isBitClr(KB_PLAYER_UP))
+		if (CApp.getKbStatus().isBitClr(CApp.KB_DOWN) && CApp.getKbStatus().isBitClr(CApp.KB_UP))
 			m_speedy = 0;
-		if (kbStatus.isBitClr(KB_PLAYER_LEFT) && kbStatus.isBitClr(KB_PLAYER_RIGHT))
+		if (CApp.getKbStatus().isBitClr(CApp.KB_LEFT) && CApp.getKbStatus().isBitClr(CApp.KB_RIGHT))
 			m_speedx = 0;
 
 	}
@@ -113,47 +104,17 @@ public class CPlayer {
 		m_life -= damageTaken;
 	}
 
-	public void setPosy(int y) {
-		m_posy = y;
-	}
-
-	public void setPosx(int x) {
-		m_posy = x;
-	}
-
-	public void setSpeedx(int x) {
-		m_speedx = x;
-	}
-
-	public void setSpeedy(int y) {
-		m_speedy = y;
-	}
-
-	public int getPosx() {
-		return m_posx;
-	}
-
-	public int getPosy() {
-		return m_posy;
-	}
-
-	public int getSpeedx() {
-		return m_speedx;
-	}
-
-	public int getSpeedy() {
-		return m_speedy;
-	}
-
 	public int getLife() {
 		return m_life;
 	}
 
-	public int getCharPosxInSet() {
+	@Override
+	public int getPosxInSet() {
 		return CHAR_POSX_IN_SET;
 	}
 
-	public int getCharPosyInSet() {
+	@Override
+	public int getPosyInSet() {
 		return CHAR_POSY_IN_SET;
 	}
 
@@ -165,5 +126,10 @@ public class CPlayer {
 
 	public int getLifePosyInSet() {
 		return LIFE_POSY_IN_SET;
+	}
+	
+	@Override
+	public boolean isDeadObject() {
+		return m_life == 0;
 	}
 }
