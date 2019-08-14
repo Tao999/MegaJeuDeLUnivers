@@ -2,7 +2,7 @@
 public class CBullet extends GameObject {
 	public static final int DEFAULT_SPEED_Y = 7;
 	public static final int DAMAGE = 1;
-	public static final int RANGE = 10 / 2;
+	public static final int RANGE = 7;
 
 	public static final int POSX_IN_SET = 32;
 	public static final int POSY_IN_SET = 0;

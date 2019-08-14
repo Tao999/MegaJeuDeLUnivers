@@ -71,7 +71,7 @@ public class CGame {
 			m_gameObjects.add(new CBullet(m_player.getPosx(), m_player.getPosy() - CGraphics.TILE_SIZE / 2,
 					m_player.getSpeedx(), m_player.getSpeedy(), true));
 
-		// collision en relation avec les ennemies
+		// collision en relation avec l'ennemies scanné
 		for (int i = 0; i < m_gameObjects.size(); i++) {
 			GameObject tempObj = m_gameObjects.get(i);
 
@@ -81,15 +81,15 @@ public class CGame {
 				CEnemy tempEnemy = (CEnemy) tempObj;
 				// collision de l'enemies avec le joueur
 				if (circlesIsInCollision(tempEnemy.getPosx(), tempEnemy.getPosy(), m_player.getPosx(),
-						m_player.getPosy(), CEnemy.RANGE, CPlayer.HITBOX)) {
+						m_player.getPosy(), CEnemy.RANGE, CPlayer.RANGE)) {
 					tempEnemy.markAsDeadObject();
 					m_player.looseHp(CEnemy.DAMAGE);
 				}
 
 				// collision avec le reste des entités
-				for (int j = i + 1; j < m_gameObjects.size(); j++) {
+				for (int j = 0; j < m_gameObjects.size(); j++) {
 					GameObject tempObj2 = m_gameObjects.get(j);
-					if (!tempObj2.isDeadObject()) {
+					if (!tempObj2.isDeadObject() && !(j <= i && tempObj2.getType() == GameObject.TYPE_ENEMY)) {
 						// on ne traite l'objet que si il est vivant
 						switch (tempObj2.getType()) {
 
@@ -166,8 +166,6 @@ public class CGame {
 					m_gameObjects.add(new CExplosion(m_gameObjects.get(i).getPosx(), m_gameObjects.get(i).getPosy()));
 				}
 				m_gameObjects.remove(i--);
-				if (m_gameObjects.size() == 0)// si il n'y a plus d'objet, on part
-					return;
 				if (i < 0)
 					i = 0;
 			}

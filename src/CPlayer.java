@@ -3,10 +3,9 @@ public class CPlayer extends GameObject {
 
 	static final int PLAYER_SPEED = 3;
 	static final int PLAYER_STRAFE_SPEED = (int) Math.ceil((double) Math.sqrt(2) / (double) 2 * (double) PLAYER_SPEED);
-	// static final int PLAYER_FRICTION = 5;
 	static final int PLAYER_SHOT_COOLDOWN = 9;
 	static final int PLAYER_LIFE_MAX = CGraphics.NB_TILE_X;
-	static final int HITBOX = 10;
+	static final int RANGE = 10;
 
 	public static final int CHAR_POSX_IN_SET = 0;
 	public static final int CHAR_POSY_IN_SET = 0;
