@@ -1,10 +1,12 @@
+package application;
+
 
 public class GameObject {
-	static final int TYPE_PLAYER = 0;
-	static final int TYPE_ENEMY = 1;
-	static final int TYPE_BULLET = 2;
-	static final int TYPE_EXPLOSION = 3;
-	static final int TYPE_NONE = 4;
+	public static final int TYPE_PLAYER = 0;
+	public static final int TYPE_ENEMY = 1;
+	public static final int TYPE_BULLET = 2;
+	public static final int TYPE_EXPLOSION = 3;
+	public static final int TYPE_NONE = 4;
 
 	protected int m_posx;
 	protected int m_posy;

@@ -1,3 +1,5 @@
+package application;
+
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
@@ -6,21 +8,30 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import mainMenu.MainMenu;
+
+@SuppressWarnings("serial")
 public class CApp extends JFrame implements KeyListener {
 	static final String ICON_PATH = "gfx/icon.png";
 	static final long PROCC_REVOVERY = 16;
 
-	static final int KB_UP = 0b1;
-	static final int KB_RIGHT = 0b10;
-	static final int KB_DOWN = 0b100;
-	static final int KB_LEFT = 0b1000;
-	static final int KB_ESCAPE = 0b10000;
-	static final int KB_SPACE = 0b100000;
+	public static final int KB_UP = 0b0000000001;
+	public static final int KB_RIGHT = 0b0000000010;
+	public static final int KB_DOWN = 0b0000000100;
+	public static final int KB_LEFT = 0b0000001000;
+	public static final int KB_Z = 0b0000010000;
+	public static final int KB_D = 0b0000100000;
+	public static final int KB_S = 0b0001000000;
+	public static final int KB_Q = 0b0010000000;
+	public static final int KB_ESCAPE = 0b0100000000;
+	public static final int KB_SPACE = 0b1000000000;
+
+	static final int KB_msk = 0b1111111111;
 
 	private ImageIcon m_icon;
 	private static volatile CFlag m_kbStatus;
 	private CGraphics m_graphics;
-	private CGame m_game;
+	private CScene m_scene;
 	private Thread m_thread;
 
 	CApp() {
@@ -28,8 +39,8 @@ public class CApp extends JFrame implements KeyListener {
 		setIconImage(m_icon.getImage());
 		m_kbStatus = new CFlag();
 		m_graphics = new CGraphics();
-		m_game = new CGame();
-		m_graphics.setGFXSet(CGame.GFXSET_PATH, CGame.FONT_PATH);
+		m_scene = new MainMenu();
+		m_graphics.setGFXSet(m_scene.getSpritePath(), m_scene.getFontPath(), m_scene.getBkgPath());
 		setTitle("Mega Jeu de l'univers | ?? fps");
 		add(m_graphics);
 		setResizable(false);
@@ -40,16 +51,12 @@ public class CApp extends JFrame implements KeyListener {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (UnsupportedLookAndFeelException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		pack();
@@ -61,12 +68,16 @@ public class CApp extends JFrame implements KeyListener {
 				long fpsCheck = 0;
 				int fpsCount = 0;
 				int latencySum = 0;
+				CScene sceneChecker = m_scene;
 
 				while (true) {
 
 					fpsCheck = timeRegulator = System.currentTimeMillis();
-					// if(m_game.isRunning())
-					m_game.proccGame();
+					m_scene = m_scene.procc();
+					if (sceneChecker != m_scene) {
+						m_graphics.setGFXSet(m_scene.getSpritePath(), m_scene.getFontPath(), m_scene.getBkgPath());
+						sceneChecker = m_scene;
+					}
 
 					// affichage
 					blast();
@@ -104,7 +115,7 @@ public class CApp extends JFrame implements KeyListener {
 
 	void blast() {
 		// blast
-		m_graphics.blastSprites(m_game.getSpritesToBlast());
+		m_graphics.blastSprites(m_scene.getSpritesToBlast());
 	}
 
 	public static CFlag getKbStatus() {
@@ -118,21 +129,39 @@ public class CApp extends JFrame implements KeyListener {
 
 	@Override
 	public void keyPressed(KeyEvent e) {
+		m_scene.clickKey(e);
+
 		switch (e.getKeyCode()) {
-		case KeyEvent.VK_Z: // UP
+		case KeyEvent.VK_UP: // UP
 			m_kbStatus.bitSet(KB_UP);
 			break;
 
-		case KeyEvent.VK_D: // RIGHT
+		case KeyEvent.VK_RIGHT: // RIGHT
 			m_kbStatus.bitSet(KB_RIGHT);
 			break;
 
-		case KeyEvent.VK_S: // DOWN
+		case KeyEvent.VK_DOWN: // DOWN
 			m_kbStatus.bitSet(KB_DOWN);
 			break;
 
-		case KeyEvent.VK_Q: // LEFT
+		case KeyEvent.VK_LEFT: // LEFT
 			m_kbStatus.bitSet(KB_LEFT);
+			break;
+
+		case KeyEvent.VK_Z: // UP
+			m_kbStatus.bitSet(KB_Z);
+			break;
+
+		case KeyEvent.VK_D: // RIGHT
+			m_kbStatus.bitSet(KB_D);
+			break;
+
+		case KeyEvent.VK_S: // DOWN
+			m_kbStatus.bitSet(KB_S);
+			break;
+
+		case KeyEvent.VK_Q: // LEFT
+			m_kbStatus.bitSet(KB_Q);
 			break;
 
 		case KeyEvent.VK_SPACE: // SHOT
@@ -140,7 +169,6 @@ public class CApp extends JFrame implements KeyListener {
 			break;
 
 		case KeyEvent.VK_ESCAPE:
-			m_game.clickEscape();
 			m_kbStatus.bitSet(KB_ESCAPE);
 			break;
 
@@ -152,20 +180,36 @@ public class CApp extends JFrame implements KeyListener {
 	@Override
 	public void keyReleased(KeyEvent e) {
 		switch (e.getKeyCode()) {
-		case KeyEvent.VK_Z: // UP
+		case KeyEvent.VK_UP: // UP
 			m_kbStatus.bitClr(KB_UP);
 			break;
 
-		case KeyEvent.VK_D: // RIGHT
+		case KeyEvent.VK_RIGHT: // RIGHT
 			m_kbStatus.bitClr(KB_RIGHT);
 			break;
 
-		case KeyEvent.VK_S: // DOWN
+		case KeyEvent.VK_DOWN: // DOWN
 			m_kbStatus.bitClr(KB_DOWN);
 			break;
 
-		case KeyEvent.VK_Q: // LEFT
+		case KeyEvent.VK_LEFT: // LEFT
 			m_kbStatus.bitClr(KB_LEFT);
+			break;
+
+		case KeyEvent.VK_Z: // UP
+			m_kbStatus.bitClr(KB_Z);
+			break;
+
+		case KeyEvent.VK_D: // RIGHT
+			m_kbStatus.bitClr(KB_D);
+			break;
+
+		case KeyEvent.VK_S: // DOWN
+			m_kbStatus.bitClr(KB_S);
+			break;
+
+		case KeyEvent.VK_Q: // LEFT
+			m_kbStatus.bitClr(KB_Q);
 			break;
 
 		case KeyEvent.VK_SPACE: // SHOT

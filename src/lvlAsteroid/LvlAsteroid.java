@@ -1,6 +1,19 @@
+package lvlAsteroid;
+
+import java.awt.event.KeyEvent;
+//package application;
 import java.util.ArrayList;
 
-public class CGame {
+import application.CFlag;
+import application.CGraphics;
+import application.CScene;
+import application.CSprite;
+import application.CText;
+import application.ContextualMenu;
+import application.GameObject;
+import mainMenu.MainMenu;
+
+public class LvlAsteroid extends CScene {
 	public final static int GAME_STATUS_MSK = 0b1111;
 	public final static int GAME_STATUS_RUNNING = 0b0001;
 	public final static int GAME_STATUS_PAUSE = 0b0010;
@@ -23,12 +36,17 @@ public class CGame {
 	public final static String PAUSE_STRING_TO_BLASE = "pause";
 	public final static int PAUSE_POSX = (int) (CGraphics.TILE_SIZE * (CGraphics.NB_TILE_X) / 2
 			- (PAUSE_STRING_TO_BLASE.length() / 2.0) * CGraphics.TILE_SIZE);
+	public final static int PAUSE_POSY = (CGraphics.NB_TILE_Y / 2 - 2) * CGraphics.TILE_SIZE;
+	
+	public final static int MENU_RESUME_GAME = 0;
+	public final static int MENU_EXIT_GAME = 1;
 
 	public final static int POSX_NUMERIC = 96;
 	public final static int POSY_NUMERIC = 32;
 
-	static final String GFXSET_PATH = "gfx/GFXSet.png";
-	static final String FONT_PATH = "gfx/font.png";
+	static final String SPRITES_PATH = "gfx/levels/asteroid/spriteSet.png";
+	static final String FONT_PATH = "gfx/font/digitDisplay.png";
+	static final String BKG_PATH = "gfx/levels/asteroid/bkg.png";
 
 	private CFlag m_status;
 	private CPlayer m_player;
@@ -37,7 +55,9 @@ public class CGame {
 	private int m_count;
 	private int m_score;
 
-	CGame() {
+	private ContextualMenu m_pauseMenu;
+
+	public LvlAsteroid() {
 		m_score = 0;
 		m_status = new CFlag();
 		m_texts = new ArrayList<CText>();
@@ -172,8 +192,9 @@ public class CGame {
 		}
 	}
 
-	private void proccPause() {
-		m_texts.add(new CText(PAUSE_STRING_TO_BLASE, PAUSE_POSX, (CGraphics.NB_TILE_Y / 2 - 1) * CGraphics.TILE_SIZE));
+	private int proccPause() {
+		m_texts.add(new CText(PAUSE_STRING_TO_BLASE, PAUSE_POSX, PAUSE_POSY));
+		return m_pauseMenu.getChoice();
 	}
 
 	private void proccStarting() {
@@ -191,14 +212,26 @@ public class CGame {
 		// m_count++;
 	}
 
-	public void proccGame() {
+	@Override
+	public CScene procc() {
 		// pas touche
 		m_texts.clear();
 		////////
 
 		if (m_status.isBitSet(GAME_STATUS_PAUSE)) {
 			// PAUSE
-			proccPause();
+			switch (proccPause()) {
+			case MENU_RESUME_GAME:
+				m_status.bitClr(GAME_STATUS_PAUSE);
+				m_pauseMenu=null;
+				break;
+
+			case MENU_EXIT_GAME:
+				return new MainMenu();
+
+			default:
+				break;
+			}
 
 		} else if (m_status.isBitSet(GAME_STATUS_RUNNING)) {
 			// RUNNING
@@ -211,6 +244,7 @@ public class CGame {
 
 		// ajout du score à l'écran (permanant)
 		m_texts.add(new CText(String.format(SCORE_FORMAT, m_score), SCORE_POSX, 0));
+		return this;
 
 	}
 
@@ -218,6 +252,7 @@ public class CGame {
 		return m_player;
 	}
 
+	@Override
 	public ArrayList<CSprite> getSpritesToBlast() {
 		ArrayList<CSprite> m_sprites = new ArrayList<CSprite>();
 		for (int i = 0; i < m_gameObjects.size(); i++) {
@@ -245,16 +280,65 @@ public class CGame {
 			}
 		}
 
+		if (m_pauseMenu != null) {
+			ArrayList<CText> texts = m_pauseMenu.getTexts();
+			for (int i = 0; i < texts.size(); i++)
+				for (int j = 0; j < texts.get(i).getText().length(); j++)
+					m_sprites.add(texts.get(i).getSpriteCharAt(j));
+		}
+
 		return m_sprites;
 	}
 
-	public void clickEscape() {
-		if (m_status.isBitClr(GAME_STATUS_PAUSE)) {
-			m_player.setSpeedx(0);
-			m_player.setSpeedy(0);
-			m_status.bitSet(GAME_STATUS_PAUSE);
-		} else if (m_status.isBitSet(GAME_STATUS_PAUSE)) {
-			m_status.bitClr(GAME_STATUS_PAUSE);
+	@Override
+	public String getSpritePath() {
+		return SPRITES_PATH;
+	}
+
+	@Override
+	public String getFontPath() {
+		return FONT_PATH;
+	}
+	
+	@Override
+	public String getBkgPath() {
+		return BKG_PATH;
+	}
+
+	@Override
+	public void clickKey(KeyEvent e) {
+		switch (e.getKeyCode()) {
+		case KeyEvent.VK_ESCAPE:
+			if (m_status.isBitClr(GAME_STATUS_PAUSE)) {
+				ArrayList<String> pauseMenu = new ArrayList<String>();
+				pauseMenu.add("resume");
+				pauseMenu.add("quit");
+				m_pauseMenu = new ContextualMenu(pauseMenu, pauseMenu.size());
+				m_player.setSpeedx(0);
+				m_player.setSpeedy(0);
+				m_status.bitSet(GAME_STATUS_PAUSE);
+			} else if (m_status.isBitSet(GAME_STATUS_PAUSE)) {
+				m_pauseMenu = null;
+				m_status.bitClr(GAME_STATUS_PAUSE);
+			}
+			break;
+
+		case KeyEvent.VK_DOWN:
+			if (m_status.isBitSet(GAME_STATUS_PAUSE))
+				m_pauseMenu.goDown();
+			break;
+
+		case KeyEvent.VK_UP:
+			if (m_status.isBitSet(GAME_STATUS_PAUSE))
+				m_pauseMenu.goUp();
+			break;
+
+		case KeyEvent.VK_ENTER:
+			m_pauseMenu.validChoice();
+			break;
+
+		default:
+			break;
 		}
 	}
 

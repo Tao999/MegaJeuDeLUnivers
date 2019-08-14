@@ -1,3 +1,6 @@
+package lvlAsteroid;
+import application.CGraphics;
+import application.GameObject;
 
 public class CEnemy extends GameObject {
 	public static final int DEFAULT_SPEED_Y = 5;

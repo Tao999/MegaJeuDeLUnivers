@@ -1,10 +1,12 @@
+package application;
+
 
 public class CText {
 	private String m_text;
 	private int m_posx;
 	private int m_posy;
 
-	CText(String text, int posx, int posy) {
+	public CText(String text, int posx, int posy) {
 		m_text = text.toUpperCase();
 		m_posx = posx;
 		m_posy = posy;

@@ -1,3 +1,6 @@
+package lvlAsteroid;
+import application.CGraphics;
+import application.GameObject;
 
 public class CExplosion extends GameObject{
 	public static final int NB_STEP = 6;

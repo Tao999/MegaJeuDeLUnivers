@@ -1,3 +1,5 @@
+package application;
+
 
 public class CSprite {
 	private int m_posx;

@@ -1,8 +1,11 @@
+package lvlAsteroid;
+import application.CApp;
+import application.CGraphics;
+import application.GameObject;
 
 public class CPlayer extends GameObject {
 
 	static final int PLAYER_SPEED = 3;
-	static final int PLAYER_STRAFE_SPEED = (int) Math.ceil((double) Math.sqrt(2) / (double) 2 * (double) PLAYER_SPEED);
 	static final int PLAYER_SHOT_COOLDOWN = 9;
 	static final int PLAYER_LIFE_MAX = CGraphics.NB_TILE_X;
 	static final int RANGE = 10;
@@ -46,36 +49,18 @@ public class CPlayer extends GameObject {
 		m_speedx = 0;
 		m_speedy = 0;
 		// set la vitesse au max
-		if (CApp.getKbStatus().isBitSet(CApp.KB_UP) && CApp.getKbStatus().isBitClr(CApp.KB_DOWN))
+		if ((CApp.getKbStatus().isBitSet(CApp.KB_UP) || (CApp.getKbStatus().isBitSet(CApp.KB_Z)))
+				&& (CApp.getKbStatus().isBitClr(CApp.KB_DOWN) && CApp.getKbStatus().isBitClr(CApp.KB_S)))
 			m_speedy = -PLAYER_SPEED;
-		if (CApp.getKbStatus().isBitSet(CApp.KB_RIGHT) && CApp.getKbStatus().isBitClr(CApp.KB_LEFT))
+		if ((CApp.getKbStatus().isBitSet(CApp.KB_RIGHT) || (CApp.getKbStatus().isBitSet(CApp.KB_D)))
+				&& (CApp.getKbStatus().isBitClr(CApp.KB_LEFT) && CApp.getKbStatus().isBitClr(CApp.KB_Q)))
 			m_speedx = PLAYER_SPEED;
-		if (CApp.getKbStatus().isBitSet(CApp.KB_DOWN) && CApp.getKbStatus().isBitClr(CApp.KB_UP))
+		if ((CApp.getKbStatus().isBitSet(CApp.KB_DOWN) || (CApp.getKbStatus().isBitSet(CApp.KB_S)))
+				&& (CApp.getKbStatus().isBitClr(CApp.KB_UP) && CApp.getKbStatus().isBitClr(CApp.KB_Z)))
 			m_speedy = PLAYER_SPEED;
-		if (CApp.getKbStatus().isBitSet(CApp.KB_LEFT) && CApp.getKbStatus().isBitClr(CApp.KB_RIGHT))
+		if ((CApp.getKbStatus().isBitSet(CApp.KB_LEFT) || (CApp.getKbStatus().isBitSet(CApp.KB_Q)))
+				&& (CApp.getKbStatus().isBitClr(CApp.KB_RIGHT) && CApp.getKbStatus().isBitClr(CApp.KB_D)))
 			m_speedx = -PLAYER_SPEED;
-
-		// gestion du strafe
-		if (CApp.getKbStatus().isBitSet(CApp.KB_UP) && CApp.getKbStatus().isBitSet(CApp.KB_RIGHT)
-				&& CApp.getKbStatus().isBitClr(CApp.KB_DOWN) && CApp.getKbStatus().isBitClr(CApp.KB_LEFT)) {
-			m_speedx = PLAYER_STRAFE_SPEED;
-			m_speedy = -PLAYER_STRAFE_SPEED;
-		}
-		if (CApp.getKbStatus().isBitSet(CApp.KB_UP) && CApp.getKbStatus().isBitSet(CApp.KB_LEFT)
-				&& CApp.getKbStatus().isBitClr(CApp.KB_DOWN) && CApp.getKbStatus().isBitClr(CApp.KB_RIGHT)) {
-			m_speedx = -PLAYER_STRAFE_SPEED;
-			m_speedy = -PLAYER_STRAFE_SPEED;
-		}
-		if (CApp.getKbStatus().isBitSet(CApp.KB_DOWN) && CApp.getKbStatus().isBitSet(CApp.KB_RIGHT)
-				&& CApp.getKbStatus().isBitClr(CApp.KB_UP) && CApp.getKbStatus().isBitClr(CApp.KB_LEFT)) {
-			m_speedx = PLAYER_STRAFE_SPEED;
-			m_speedy = PLAYER_STRAFE_SPEED;
-		}
-		if (CApp.getKbStatus().isBitSet(CApp.KB_DOWN) && CApp.getKbStatus().isBitSet(CApp.KB_LEFT)
-				&& CApp.getKbStatus().isBitClr(CApp.KB_UP) && CApp.getKbStatus().isBitClr(CApp.KB_RIGHT)) {
-			m_speedx = -PLAYER_STRAFE_SPEED;
-			m_speedy = PLAYER_STRAFE_SPEED;
-		}
 
 		// mouvement
 		m_posx += m_speedx;
@@ -90,12 +75,6 @@ public class CPlayer extends GameObject {
 			m_posx = (CGraphics.NB_TILE_X - 1) * CGraphics.TILE_SIZE;
 		if (m_posy > (CGraphics.NB_TILE_Y - 2) * CGraphics.TILE_SIZE)
 			m_posy = (CGraphics.NB_TILE_Y - 2) * CGraphics.TILE_SIZE;
-
-		// gestion des speed
-		if (CApp.getKbStatus().isBitClr(CApp.KB_DOWN) && CApp.getKbStatus().isBitClr(CApp.KB_UP))
-			m_speedy = 0;
-		if (CApp.getKbStatus().isBitClr(CApp.KB_LEFT) && CApp.getKbStatus().isBitClr(CApp.KB_RIGHT))
-			m_speedx = 0;
 
 	}
 
@@ -126,7 +105,7 @@ public class CPlayer extends GameObject {
 	public int getLifePosyInSet() {
 		return LIFE_POSY_IN_SET;
 	}
-	
+
 	@Override
 	public boolean isDeadObject() {
 		return m_life == 0;
