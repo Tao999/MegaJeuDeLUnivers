@@ -40,7 +40,6 @@ public class CGraphics extends JPanel {
 	}
 
 	public void setGFXSet(String gfxPath, String fontPath, String bkgPath) {
-		System.out.println("changement des sets graphiques");
 		// chargement des gfx
 		if (gfxPath != null)
 			try {

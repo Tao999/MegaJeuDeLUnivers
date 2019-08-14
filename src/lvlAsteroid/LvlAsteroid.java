@@ -313,7 +313,7 @@ public class LvlAsteroid extends CScene {
 				ArrayList<String> pauseMenu = new ArrayList<String>();
 				pauseMenu.add("resume");
 				pauseMenu.add("quit");
-				m_pauseMenu = new ContextualMenu(pauseMenu, pauseMenu.size());
+				m_pauseMenu = new ContextualMenu(pauseMenu, pauseMenu.size(), ContextualMenu.ALIGN_CENTER, ContextualMenu.ALIGN_CENTER, ContextualMenu.ALIGN_CENTER);
 				m_player.setSpeedx(0);
 				m_player.setSpeedy(0);
 				m_status.bitSet(GAME_STATUS_PAUSE);
