@@ -9,58 +9,56 @@ import application.CGraphics;
 import application.CScene;
 import application.CSprite;
 import application.CText;
-import application.ContextualMenu;
+import application.ConMenu;
 import application.GameObject;
 import mainMenu.MainMenu;
 
 public class LvlAsteroid extends CScene {
-	public final static int GAME_STATUS_MSK = 0b1111;
-	public final static int GAME_STATUS_RUNNING = 0b0001;
-	public final static int GAME_STATUS_PAUSE = 0b0010;
-	public final static int GAME_STATUS_LOST = 0b0100;
-	public final static int GAME_STATUS_STARTING = 0b1000;
+	final static int GAME_STATUS_MSK = 0b1111;
+	final static int GAME_STATUS_RUNNING = 0b0001;
+	final static int GAME_STATUS_PAUSE = 0b0010;
+	final static int GAME_STATUS_LOST = 0b0100;
+	final static int GAME_STATUS_STARTING = 0b1000;
 
-	public final static int MAX_SPAWN_ASTEROID = 2;
-	public final static int SPAWN_ENEMY_RATE = 11;
-	public final static int COUNTER_COLLISION_BUG = 3;
-	public final static int NB_SCORE_TO_BLAST = 5;
-	public final static int SCORE_POSX = (CGraphics.NB_TILE_X / 2 - NB_SCORE_TO_BLAST / 2) * CGraphics.TILE_SIZE;
-	public final static String SCORE_FORMAT = "%0" + NB_SCORE_TO_BLAST + "d";
+	final static int MAX_SPAWN_ASTEROID = 2;
+	final static int SPAWN_ENEMY_RATE = 11;
+	final static int COUNTER_COLLISION_BUG = 3;
+	final static int NB_SCORE_TO_BLAST = 5;
+	final static int SCORE_POSX = (CGraphics.NB_TILE_X / 2 - NB_SCORE_TO_BLAST / 2) * CGraphics.TILE_SIZE;
+	final static String SCORE_FORMAT = "%0" + NB_SCORE_TO_BLAST + "d";
 
-	public final static String COUNTDOWN_TEXT = "ready?";
-	public final static int COUNTDOWN_POSX = CGraphics.TILE_SIZE * (CGraphics.NB_TILE_X - 1) / 2;
-	public final static int COUNTDOWN_POSY = CGraphics.TILE_SIZE * (CGraphics.NB_TILE_Y - 1) / 2;
-	public final static int COUNTDOWN_TEXT_POSX = (int) (CGraphics.TILE_SIZE * (CGraphics.NB_TILE_X) / 2
+	final static String COUNTDOWN_TEXT = "ready?";
+	final static int COUNTDOWN_POSX = CGraphics.TILE_SIZE * (CGraphics.NB_TILE_X - 1) / 2;
+	final static int COUNTDOWN_POSY = CGraphics.TILE_SIZE * (CGraphics.NB_TILE_Y - 1) / 2;
+	final static int COUNTDOWN_TEXT_POSX = (int) (CGraphics.TILE_SIZE * (CGraphics.NB_TILE_X) / 2
 			- (COUNTDOWN_TEXT.length() / 2.0) * CGraphics.TILE_SIZE);
 
-	public final static String PAUSE_STRING_TO_BLASE = "pause";
-	public final static int PAUSE_POSX = (int) (CGraphics.TILE_SIZE * (CGraphics.NB_TILE_X) / 2
+	final static String PAUSE_STRING_TO_BLASE = "pause";
+	final static int PAUSE_POSX = (int) (CGraphics.TILE_SIZE * (CGraphics.NB_TILE_X) / 2
 			- (PAUSE_STRING_TO_BLASE.length() / 2.0) * CGraphics.TILE_SIZE);
-	public final static int PAUSE_POSY = (CGraphics.NB_TILE_Y / 2 - 2) * CGraphics.TILE_SIZE;
-	
-	public final static int MENU_RESUME_GAME = 0;
-	public final static int MENU_EXIT_GAME = 1;
+	final static int PAUSE_POSY = (CGraphics.NB_TILE_Y / 2 - 2) * CGraphics.TILE_SIZE;
 
-	public final static int POSX_NUMERIC = 96;
-	public final static int POSY_NUMERIC = 32;
+	final static int MENU_RESUME_GAME = 0;
+	final static int MENU_EXIT_GAME = 1;
 
-	static final String SPRITES_PATH = "gfx/levels/asteroid/spriteSet.png";
-	static final String FONT_PATH = "gfx/font/digitDisplay.png";
-	static final String BKG_PATH = "gfx/levels/asteroid/bkg.png";
+	final static int POSX_NUMERIC = 96;
+	final static int POSY_NUMERIC = 32;
+
+	final String SPRITES_PATH = "gfx/levels/asteroid/spriteSet.png";
+	final String FONT_PATH = "gfx/font/digitDisplay.png";
+	final String BKG_PATH = "gfx/levels/asteroid/bkg.png";
 
 	private CFlag m_status;
 	private CPlayer m_player;
-	private ArrayList<CText> m_texts;
 	private ArrayList<GameObject> m_gameObjects;
 	private int m_count;
 	private int m_score;
 
-	private ContextualMenu m_pauseMenu;
+	private ConMenu m_pauseMenu;
 
 	public LvlAsteroid() {
 		m_score = 0;
 		m_status = new CFlag();
-		m_texts = new ArrayList<CText>();
 		m_player = new CPlayer();
 		m_gameObjects = new ArrayList<GameObject>();
 
@@ -193,8 +191,7 @@ public class LvlAsteroid extends CScene {
 	}
 
 	private int proccPause() {
-		m_texts.add(new CText(PAUSE_STRING_TO_BLASE, PAUSE_POSX, PAUSE_POSY));
-		return m_pauseMenu.getChoice();
+		return m_pauseMenu.getSelectedChoice();
 	}
 
 	private void proccStarting() {
@@ -204,26 +201,18 @@ public class LvlAsteroid extends CScene {
 			m_score = 0;
 			m_status.bitClr(GAME_STATUS_MSK);
 			m_status.bitSet(GAME_STATUS_RUNNING);
-		} else {
-			// ajout du compte à rebours à l'écran
-			m_texts.add(new CText(COUNTDOWN_TEXT, COUNTDOWN_TEXT_POSX, COUNTDOWN_POSY - 32));
-			m_texts.add(new CText(iTemp.toString(), COUNTDOWN_POSX, COUNTDOWN_POSY));
 		}
-		// m_count++;
 	}
 
 	@Override
 	public CScene procc() {
-		// pas touche
-		m_texts.clear();
-		////////
 
 		if (m_status.isBitSet(GAME_STATUS_PAUSE)) {
 			// PAUSE
 			switch (proccPause()) {
 			case MENU_RESUME_GAME:
 				m_status.bitClr(GAME_STATUS_PAUSE);
-				m_pauseMenu=null;
+				m_pauseMenu = null;
 				break;
 
 			case MENU_EXIT_GAME:
@@ -242,8 +231,6 @@ public class LvlAsteroid extends CScene {
 			proccStarting();
 		}
 
-		// ajout du score à l'écran (permanant)
-		m_texts.add(new CText(String.format(SCORE_FORMAT, m_score), SCORE_POSX, 0));
 		return this;
 
 	}
@@ -274,18 +261,18 @@ public class LvlAsteroid extends CScene {
 		}
 
 		// chargement des texts
-		for (int i = 0; i < m_texts.size(); i++) {
-			for (int j = 0; j < m_texts.get(i).getText().length(); j++) {
-				m_sprites.add(m_texts.get(i).getSpriteCharAt(j));
-			}
+		if (m_status.isBitSet(GAME_STATUS_PAUSE))//chargement de "pause"
+			m_sprites.addAll(new CText(PAUSE_STRING_TO_BLASE, PAUSE_POSX, PAUSE_POSY).getSprites());
+		else if (m_status.isBitSet(GAME_STATUS_STARTING) && 3 - m_count / 59 != 0) {
+			Integer iTemp = 3 - m_count / 59;//chargement de "ready?" et du compte a rebours
+			m_sprites.addAll(new CText(COUNTDOWN_TEXT, COUNTDOWN_TEXT_POSX, COUNTDOWN_POSY - CGraphics.TILE_SIZE).getSprites());
+			m_sprites.addAll(new CText(iTemp.toString(), COUNTDOWN_POSX, COUNTDOWN_POSY).getSprites());
 		}
+		//chargement score
+		m_sprites.addAll(new CText(String.format(SCORE_FORMAT, m_score), SCORE_POSX, 0).getSprites());
 
-		if (m_pauseMenu != null) {
-			ArrayList<CText> texts = m_pauseMenu.getTexts();
-			for (int i = 0; i < texts.size(); i++)
-				for (int j = 0; j < texts.get(i).getText().length(); j++)
-					m_sprites.add(texts.get(i).getSpriteCharAt(j));
-		}
+		if (m_pauseMenu != null)
+			m_sprites.addAll(m_pauseMenu.getSprites());
 
 		return m_sprites;
 	}
@@ -299,7 +286,7 @@ public class LvlAsteroid extends CScene {
 	public String getFontPath() {
 		return FONT_PATH;
 	}
-	
+
 	@Override
 	public String getBkgPath() {
 		return BKG_PATH;
@@ -313,7 +300,8 @@ public class LvlAsteroid extends CScene {
 				ArrayList<String> pauseMenu = new ArrayList<String>();
 				pauseMenu.add("resume");
 				pauseMenu.add("quit");
-				m_pauseMenu = new ContextualMenu(pauseMenu, pauseMenu.size(), ContextualMenu.ALIGN_CENTER, ContextualMenu.ALIGN_CENTER, ContextualMenu.ALIGN_CENTER);
+				m_pauseMenu = new ConMenu(pauseMenu, pauseMenu.size(), ConMenu.ALIGN_CENTER, ConMenu.ALIGN_CENTER,
+						ConMenu.ALIGN_CENTER);
 				m_player.setSpeedx(0);
 				m_player.setSpeedy(0);
 				m_status.bitSet(GAME_STATUS_PAUSE);

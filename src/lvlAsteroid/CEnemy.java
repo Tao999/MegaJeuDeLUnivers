@@ -3,14 +3,14 @@ import application.CGraphics;
 import application.GameObject;
 
 public class CEnemy extends GameObject {
-	public static final int DEFAULT_SPEED_Y = 5;
-	public static final int SPEED_MOL = 2;
-	public static final int RANGE = CGraphics.TILE_SIZE / 2;
-	public static final int DEFAULT_LIFE = 3;
-	public static final int DAMAGE = 1;
+	static final int DEFAULT_SPEED_Y = 5;
+	static final int SPEED_MOL = 2;
+	static final int RANGE = CGraphics.TILE_SIZE / 2;
+	static final int DEFAULT_LIFE = 3;
+	static final int DAMAGE = 1;
 
-	public static final int POSX_IN_SET = 64;
-	public static final int POSY_IN_SET = 0;
+	static final int POSX_IN_SET = 64;
+	static final int POSY_IN_SET = 0;
 
 	private int m_life;
 

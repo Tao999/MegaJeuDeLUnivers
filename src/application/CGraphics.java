@@ -16,16 +16,17 @@ public class CGraphics extends JPanel {
 	public static final int TILESET_CODE_SPRITE = 0;
 	public static final int TILESET_CODE_FONT = 1;
 
-	public static final int CHAR_START = '0';
-	public static final int CHAR_FINAL = 'Z';
-	public static final int CHAR_ERR_X = 0;
-	public static final int CHAR_ERR_Y = 64;
-	public static final int SCREEN_ZOOM = 2;
+	static final int CHAR_ERR_X = 0;
+	static final int CHAR_ERR_Y = 64;
+	
+	//les valeurs de zooms sont multipliers par 10 pour éviter les bug de calculs due à java
+	public static final int MAX_ZOOM = 20;
+	public static final int MIN_ZOOM = 10;
+
+	static final int  START_ZOOM = 20;
 	public static final int TILE_SIZE = 32;
 	public static final int NB_TILE_X = 13;
 	public static final int NB_TILE_Y = 15;
-	public static final int SCREEN_SIZE_X = NB_TILE_X * TILE_SIZE * SCREEN_ZOOM;
-	public static final int SCREEN_SIZE_Y = NB_TILE_Y * TILE_SIZE * SCREEN_ZOOM;
 	public static final int GFXSET_SIZE_SIDE = 8;
 	public static final int FONT_SIZE_SIDE = 8;
 
@@ -34,9 +35,16 @@ public class CGraphics extends JPanel {
 	private BufferedImage m_font;
 	private BufferedImage m_bkg;
 
+	private int m_screenZoom;
+	private double m_screenSizeX;
+	private double m_screenSizeY;
+
 	CGraphics() {
-		setPreferredSize(new Dimension(SCREEN_SIZE_X, SCREEN_SIZE_Y));
-		buf = new BufferedImage(SCREEN_SIZE_X, SCREEN_SIZE_Y, BufferedImage.TYPE_INT_RGB);
+		m_screenZoom = START_ZOOM;
+		m_screenSizeX = NB_TILE_X * TILE_SIZE * m_screenZoom/10.0;
+		m_screenSizeY = NB_TILE_Y * TILE_SIZE * m_screenZoom/10.0;
+		setPreferredSize(new Dimension((int) m_screenSizeX, (int) m_screenSizeY));
+		buf = new BufferedImage((int) m_screenSizeX, (int) m_screenSizeY, BufferedImage.TYPE_INT_RGB);
 	}
 
 	public void setGFXSet(String gfxPath, String fontPath, String bkgPath) {
@@ -82,7 +90,7 @@ public class CGraphics extends JPanel {
 
 		// chargement du background
 		if (m_bkg != null)
-			g.drawImage(m_bkg, 0, 0, m_bkg.getWidth() * SCREEN_ZOOM, m_bkg.getHeight() * SCREEN_ZOOM,
+			g.drawImage(m_bkg, 0, 0, (int) (m_bkg.getWidth() * m_screenZoom/10.0), (int) (m_bkg.getHeight() * m_screenZoom/10.0),
 					this);
 
 		// chargements de tout les sprites
@@ -94,14 +102,14 @@ public class CGraphics extends JPanel {
 					g.drawImage(
 							m_GFXSet.getSubimage(tempSprite.getPosxInGraphicSet(), tempSprite.getPosyInGraphicSet(),
 									TILE_SIZE, TILE_SIZE),
-							tempSprite.getPosx() * SCREEN_ZOOM, tempSprite.getPosy() * SCREEN_ZOOM,
-							TILE_SIZE * SCREEN_ZOOM, TILE_SIZE * SCREEN_ZOOM, this);
+							(int) (tempSprite.getPosx() * m_screenZoom/10.0), (int) (tempSprite.getPosy() * m_screenZoom/10.0),
+							(int) (TILE_SIZE * m_screenZoom/10.0), (int) (TILE_SIZE * m_screenZoom/10.0), this);
 				else if (tempSprite.getTileSetToUse() == TILESET_CODE_FONT)
 					g.drawImage(
 							m_font.getSubimage(tempSprite.getPosxInGraphicSet(), tempSprite.getPosyInGraphicSet(),
 									TILE_SIZE, TILE_SIZE),
-							tempSprite.getPosx() * SCREEN_ZOOM, tempSprite.getPosy() * SCREEN_ZOOM,
-							TILE_SIZE * SCREEN_ZOOM, TILE_SIZE * SCREEN_ZOOM, this);
+							(int) (tempSprite.getPosx() * m_screenZoom/10.0), (int) (tempSprite.getPosy() * m_screenZoom/10.0),
+							(int) (TILE_SIZE * m_screenZoom/10.0), (int) (TILE_SIZE * m_screenZoom/10.0), this);
 			}
 		}
 		// call blast
@@ -111,6 +119,18 @@ public class CGraphics extends JPanel {
 	public void paint(Graphics g) {
 		// blast
 		g.drawImage(buf, 0, 0, this);
+	}
+
+	public int getScreenZoom() {
+		return m_screenZoom;
+	}
+	
+	public void setScreenZoom(int zoom) {
+		m_screenZoom = zoom;
+		m_screenSizeX = NB_TILE_X * TILE_SIZE * m_screenZoom/10.0;
+		m_screenSizeY = NB_TILE_Y * TILE_SIZE * m_screenZoom/10.0;
+		setPreferredSize(new Dimension((int) m_screenSizeX, (int) m_screenSizeY));
+		buf = new BufferedImage((int) m_screenSizeX, (int) m_screenSizeY, BufferedImage.TYPE_INT_RGB);
 	}
 
 }

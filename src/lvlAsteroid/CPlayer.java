@@ -10,11 +10,11 @@ public class CPlayer extends GameObject {
 	static final int PLAYER_LIFE_MAX = CGraphics.NB_TILE_X;
 	static final int RANGE = 10;
 
-	public static final int CHAR_POSX_IN_SET = 0;
-	public static final int CHAR_POSY_IN_SET = 0;
+	static final int CHAR_POSX_IN_SET = 0;
+	static final int CHAR_POSY_IN_SET = 0;
 
-	public static final int LIFE_POSX_IN_SET = 32;
-	public static final int LIFE_POSY_IN_SET = 32;
+	static final int LIFE_POSX_IN_SET = 32;
+	static final int LIFE_POSY_IN_SET = 32;
 
 	private int m_shotCoolDown;
 	private int m_life;

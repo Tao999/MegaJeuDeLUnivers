@@ -2,7 +2,7 @@ package application;
 
 import java.util.ArrayList;
 
-public class ContextualMenu {
+public class ConMenu {
 	public static final int NOT_A_CHOICE = -1;
 
 	public static final int ALIGN_CENTER = -1;
@@ -21,7 +21,7 @@ public class ContextualMenu {
 	private int m_maxChar;
 	private int m_alignment;
 
-	public ContextualMenu(ArrayList<String> choices, int nbToDisplay, int posx, int posy, int alignment) {
+	public ConMenu(ArrayList<String> choices, int nbToDisplay, int posx, int posy, int alignment) {
 		m_selectedChoice = NOT_A_CHOICE;
 		m_choices = choices;
 		m_alignment = alignment;
@@ -53,8 +53,9 @@ public class ContextualMenu {
 		m_choices.trimToSize();
 	}
 
-	public ArrayList<CText> getTexts() {
+	public ArrayList<CSprite> getSprites() {
 		ArrayList<CText> texts = new ArrayList<CText>();
+		ArrayList<CSprite> sprites = new ArrayList<CSprite>();
 		for (int i = 0; i < m_nbToDisplay; i++) {
 			{
 				int dif = 0;
@@ -79,7 +80,12 @@ public class ContextualMenu {
 
 			}
 		}
-		return texts;
+		for(int i=0; i<texts.size(); i++) {
+			for(int j=0; j<texts.get(i).getText().length(); j++) {
+				sprites.add(texts.get(i).getSpriteCharAt(j));
+			}
+		}
+		return sprites;
 	}
 
 	public void goDown() {
@@ -99,9 +105,17 @@ public class ContextualMenu {
 	public void validChoice() {
 		m_selectedChoice = m_currentChoice;
 	}
+	
+	public int getCurrentChoice() {
+		return m_currentChoice;
+	}
 
-	public int getChoice() {
+	public int getSelectedChoice() {
 		return m_selectedChoice;
+	}
+	
+	public void setTextAt(int i, String text) {
+		m_choices.set(i, text);
 	}
 
 }

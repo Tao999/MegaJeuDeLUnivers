@@ -3,11 +3,11 @@ import application.CGraphics;
 import application.GameObject;
 
 public class CExplosion extends GameObject{
-	public static final int NB_STEP = 6;
-	public static final int FRAME_BY_STEP = 3;
+	static final int NB_STEP = 6;
+	static final int FRAME_BY_STEP = 3;
 
-	public static final int POSX_IN_SET = 96;
-	public static final int POSY_IN_SET = 0;
+	static final int POSX_IN_SET = 96;
+	static final int POSY_IN_SET = 0;
 
 	private int m_count;
 

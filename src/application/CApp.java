@@ -1,5 +1,6 @@
 package application;
 
+import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
@@ -30,11 +31,14 @@ public class CApp extends JFrame implements KeyListener {
 
 	private ImageIcon m_icon;
 	private static volatile CFlag m_kbStatus;
-	private CGraphics m_graphics;
+	private static CGraphics m_graphics;
 	private CScene m_scene;
 	private Thread m_thread;
+	
+	private static CApp app;
 
 	CApp() {
+		app = this;
 		m_icon = new ImageIcon(ICON_PATH);
 		setIconImage(m_icon.getImage());
 		m_kbStatus = new CFlag();
@@ -113,6 +117,11 @@ public class CApp extends JFrame implements KeyListener {
 
 	}
 
+	public static void setScreenZoom(int zoom) {
+		m_graphics.setScreenZoom(zoom);
+		app.pack();
+	}
+
 	void blast() {
 		// blast
 		m_graphics.blastSprites(m_scene.getSpritesToBlast());
@@ -120,6 +129,10 @@ public class CApp extends JFrame implements KeyListener {
 
 	public static CFlag getKbStatus() {
 		return m_kbStatus;
+	}
+	
+	public static CGraphics getCGraphics() {
+		return m_graphics;
 	}
 
 	@Override

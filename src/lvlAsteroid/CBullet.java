@@ -3,12 +3,12 @@ import application.CGraphics;
 import application.GameObject;
 
 public class CBullet extends GameObject {
-	public static final int DEFAULT_SPEED_Y = 7;
-	public static final int DAMAGE = 1;
-	public static final int RANGE = 7;
+	static final int DEFAULT_SPEED_Y = 7;
+	static final int DAMAGE = 1;
+	static final int RANGE = 7;
 
-	public static final int POSX_IN_SET = 32;
-	public static final int POSY_IN_SET = 0;
+	static final int POSX_IN_SET = 32;
+	static final int POSY_IN_SET = 0;
 
 	private boolean m_isAlly;
 
