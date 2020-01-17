@@ -1,15 +1,11 @@
 package application;
 
-import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-
-import mainMenu.MainMenu;
+import simpleScene.SimpleScene;
 
 @SuppressWarnings("serial")
 public class CApp extends JFrame implements KeyListener {
@@ -27,31 +23,29 @@ public class CApp extends JFrame implements KeyListener {
 	public static final int KB_ESCAPE = 0b0100000000;
 	public static final int KB_SPACE = 0b1000000000;
 
-	static final int KB_msk = 0b1111111111;
-
 	private ImageIcon m_icon;
-	private static volatile CFlag m_kbStatus;
+	private static volatile Flag m_kbStatus;
 	private static CGraphics m_graphics;
-	private CScene m_scene;
+	private Scene m_scene;
 	private Thread m_thread;
-	
+
 	private static CApp app;
 
 	CApp() {
 		app = this;
 		m_icon = new ImageIcon(ICON_PATH);
 		setIconImage(m_icon.getImage());
-		m_kbStatus = new CFlag();
+		m_kbStatus = new Flag();
 		m_graphics = new CGraphics();
-		m_scene = new MainMenu();
-		m_graphics.setGFXSet(m_scene.getSpritePath(), m_scene.getFontPath(), m_scene.getBkgPath());
-		setTitle("Mega Jeu de l'univers | ?? fps");
+		m_scene = new SimpleScene();
+		m_graphics.setGFXSet(m_scene.getGfxRessources());
+		setTitle("RSA engine");
 		add(m_graphics);
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
 		addKeyListener(this);
-		System.setProperty("sun.java2d.opengl", "True");
+		/*System.setProperty("sun.java2d.opengl", "True");
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (ClassNotFoundException e) {
@@ -62,24 +56,21 @@ public class CApp extends JFrame implements KeyListener {
 			e.printStackTrace();
 		} catch (UnsupportedLookAndFeelException e) {
 			e.printStackTrace();
-		}
+		}*/
 		pack();
 
 		// THREAD GAME
 		m_thread = new Thread() {
 			public void run() {
 				long timeRegulator;
-				long fpsCheck = 0;
-				int fpsCount = 0;
-				int latencySum = 0;
-				CScene sceneChecker = m_scene;
+
+				Scene sceneChecker = m_scene;
 
 				while (true) {
-
-					fpsCheck = timeRegulator = System.currentTimeMillis();
+					timeRegulator = System.currentTimeMillis();
 					m_scene = m_scene.procc();
 					if (sceneChecker != m_scene) {
-						m_graphics.setGFXSet(m_scene.getSpritePath(), m_scene.getFontPath(), m_scene.getBkgPath());
+						m_graphics.setGFXSet(m_scene.getGfxRessources());
 						sceneChecker = m_scene;
 					}
 
@@ -100,20 +91,10 @@ public class CApp extends JFrame implements KeyListener {
 					} catch (InterruptedException ex) {
 
 					}
-					// affichage fps
-					fpsCheck = System.currentTimeMillis() - fpsCheck;
-					latencySum += fpsCheck;
-					if (fpsCount++ == 30) {
-						fpsCount = 0;
-						setTitle("Mega Jeu de l'univers | " + (int) (1000 / (latencySum / 30.0)) + " fps");
-						latencySum = 0;
-					}
 				}
 			};
 
 		};
-
-		m_thread.start();
 
 	}
 
@@ -124,13 +105,13 @@ public class CApp extends JFrame implements KeyListener {
 
 	void blast() {
 		// blast
-		m_graphics.blastSprites(m_scene.getSpritesToBlast());
+		m_graphics.blast(m_scene.getMapInfo(), m_scene.getSpritesToBlast());
 	}
 
-	public static CFlag getKbStatus() {
+	public static Flag getKbStatus() {
 		return m_kbStatus;
 	}
-	
+
 	public static CGraphics getCGraphics() {
 		return m_graphics;
 	}
@@ -161,23 +142,23 @@ public class CApp extends JFrame implements KeyListener {
 			m_kbStatus.bitSet(KB_LEFT);
 			break;
 
-		case KeyEvent.VK_Z: // UP
+		case KeyEvent.VK_Z: // z
 			m_kbStatus.bitSet(KB_Z);
 			break;
 
-		case KeyEvent.VK_D: // RIGHT
+		case KeyEvent.VK_D: // d
 			m_kbStatus.bitSet(KB_D);
 			break;
 
-		case KeyEvent.VK_S: // DOWN
+		case KeyEvent.VK_S: // s
 			m_kbStatus.bitSet(KB_S);
 			break;
 
-		case KeyEvent.VK_Q: // LEFT
+		case KeyEvent.VK_Q: // q
 			m_kbStatus.bitSet(KB_Q);
 			break;
 
-		case KeyEvent.VK_SPACE: // SHOT
+		case KeyEvent.VK_SPACE: // space
 			m_kbStatus.bitSet(KB_SPACE);
 			break;
 
@@ -209,23 +190,23 @@ public class CApp extends JFrame implements KeyListener {
 			m_kbStatus.bitClr(KB_LEFT);
 			break;
 
-		case KeyEvent.VK_Z: // UP
+		case KeyEvent.VK_Z: // z
 			m_kbStatus.bitClr(KB_Z);
 			break;
 
-		case KeyEvent.VK_D: // RIGHT
+		case KeyEvent.VK_D: // d
 			m_kbStatus.bitClr(KB_D);
 			break;
 
-		case KeyEvent.VK_S: // DOWN
+		case KeyEvent.VK_S: // s
 			m_kbStatus.bitClr(KB_S);
 			break;
 
-		case KeyEvent.VK_Q: // LEFT
+		case KeyEvent.VK_Q: // q
 			m_kbStatus.bitClr(KB_Q);
 			break;
 
-		case KeyEvent.VK_SPACE: // SHOT
+		case KeyEvent.VK_SPACE: // space
 			m_kbStatus.bitClr(KB_SPACE);
 			break;
 
@@ -236,5 +217,8 @@ public class CApp extends JFrame implements KeyListener {
 		default:
 			break;
 		}
+	}
+	public void start() {
+		m_thread.start();
 	}
 }
